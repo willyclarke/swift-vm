@@ -94,6 +94,15 @@ struct ContentView: View {
                     }
                     .pickerStyle(.menu)
                     .fixedSize()
+                    Picker("Disk", selection: $manager.vmConfig.diskSizeGB) {
+                        ForEach(VMConfig.diskSizeOptions, id: \.self) { gb in
+                            Text("\(gb) GB").tag(gb)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                    .disabled(manager.bundleExists)
+                    .help(manager.bundleExists ? "Disk size is fixed after creation" : "Disk image size — cannot be changed after creation")
                 }
                 .controlSize(.small)
                 .disabled(manager.isRunning)

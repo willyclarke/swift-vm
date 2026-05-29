@@ -163,7 +163,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
     func newVM() {
         let panel = NSSavePanel()
         panel.title = "New Virtual Machine"
-        panel.message = "Choose a name and location for the new VM bundle."
+        panel.message = "Choose a name and location. You can adjust CPU, RAM and disk size before installing."
         panel.nameFieldStringValue = "Linux VM.bundle"
         panel.canCreateDirectories = true
         panel.begin { [weak self] response in
@@ -172,7 +172,6 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
                 url = url.appendingPathExtension("bundle")
             }
             self.bundle = VMBundle(url: url)
-            self.promptForISO()
         }
     }
 
@@ -195,7 +194,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
     private func install(isoURL: URL) {
         isStarting = true
         do {
-            try bundle.create()
+            try bundle.create(config: vmConfig)
             Self.saveBookmark(for: bundle.url)
             try bundle.saveConfig(vmConfig)
             let config = try VMConfigurationBuilder.build(bundle: bundle, installISO: isoURL, vmConfig: vmConfig)

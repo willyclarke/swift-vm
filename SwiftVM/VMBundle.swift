@@ -40,9 +40,12 @@ struct VMConfig: Codable {
     var memoryGB: Int
     var sharedFolders: [SharedFolder]
 
-    init(cpuCount: Int, memoryGB: Int, sharedFolders: [SharedFolder] = []) {
+    var diskSizeGB: Int
+
+    init(cpuCount: Int, memoryGB: Int, diskSizeGB: Int = 64, sharedFolders: [SharedFolder] = []) {
         self.cpuCount = cpuCount
         self.memoryGB = memoryGB
+        self.diskSizeGB = diskSizeGB
         self.sharedFolders = sharedFolders
     }
 
@@ -50,8 +53,11 @@ struct VMConfig: Codable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         cpuCount = try c.decode(Int.self, forKey: .cpuCount)
         memoryGB = try c.decode(Int.self, forKey: .memoryGB)
+        diskSizeGB = (try? c.decode(Int.self, forKey: .diskSizeGB)) ?? 64
         sharedFolders = (try? c.decode([SharedFolder].self, forKey: .sharedFolders)) ?? []
     }
+
+    static let diskSizeOptions: [Int] = [32, 64, 128, 256, 512]
 }
 
 struct VMBundle {
@@ -103,12 +109,12 @@ struct VMBundle {
         try data.write(to: configURL, options: .atomic)
     }
 
-    func create() throws {
+    func create(config: VMConfig) throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: false)
         FileManager.default.createFile(atPath: diskImageURL.path, contents: nil)
         let handle = try FileHandle(forWritingTo: diskImageURL)
         // APFS creates sparse files, so this returns immediately regardless of size.
-        let diskSize: UInt64 = 64 * 1_024 * 1_024 * 1_024
+        let diskSize: UInt64 = UInt64(config.diskSizeGB) * 1_024 * 1_024 * 1_024
         try handle.truncate(atOffset: diskSize)
         try handle.close()
     }
