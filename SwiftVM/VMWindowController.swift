@@ -3,15 +3,16 @@ import Virtualization
 
 final class VMWindowController: NSWindowController, NSWindowDelegate {
     private let vmView = VMInputView()
+    private var stateObservation: NSKeyValueObservation?
 
-    init(virtualMachine: VZVirtualMachine) {
+    init(virtualMachine: VZVirtualMachine, displayName: String) {
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1280, height: 720),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
-        window.title = "Swift VM"
+        window.title = displayName
         window.contentMinSize = NSSize(width: 640, height: 480)
         window.contentView = vmView
         super.init(window: window)
@@ -19,6 +20,12 @@ final class VMWindowController: NSWindowController, NSWindowDelegate {
         window.delegate = self
         vmView.virtualMachine = virtualMachine
         vmView.automaticallyReconfiguresDisplay = true
+
+        stateObservation = virtualMachine.observe(\.state) { [weak self] vm, _ in
+            if vm.state == .stopped || vm.state == .error {
+                DispatchQueue.main.async { self?.window?.close() }
+            }
+        }
     }
 
     required init?(coder: NSCoder) { fatalError() }

@@ -22,6 +22,8 @@ struct ContentView: View {
             Text("Swift VM")
                 .font(.largeTitle.bold())
 
+            bundleSelector
+
             if manager.isStarting {
                 ProgressView("Starting virtual machine…")
             } else {
@@ -44,5 +46,49 @@ struct ContentView: View {
             }
         }
         .padding(48)
+    }
+
+    private var bundleSelector: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "externaldrive")
+                .font(.title2)
+                .foregroundStyle(.secondary)
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(manager.bundle.displayName)
+                    .font(.headline)
+                Text(manager.bundle.abbreviatedPath)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+
+            Spacer()
+
+            HStack(spacing: 6) {
+                Button {
+                    manager.selectBundle()
+                } label: {
+                    Label("Change…", systemImage: "folder")
+                }
+                .help("Open an existing VM bundle")
+                .disabled(manager.isRunning)
+
+                Button {
+                    manager.newVM()
+                } label: {
+                    Label("New…", systemImage: "plus.circle.fill")
+                }
+                .help("Create a new VM bundle")
+                .disabled(manager.isRunning)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+        }
+        .padding(12)
+        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+        .frame(maxWidth: .infinity)
     }
 }

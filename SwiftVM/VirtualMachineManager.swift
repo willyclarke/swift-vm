@@ -8,10 +8,21 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
     @Published var isStarting = false
     @Published var hasError = false
     @Published var errorMessage: String?
+    @Published var bundle: VMBundle
 
-    private let bundle = VMBundle()
     private var virtualMachine: VZVirtualMachine?
     private var windowController: VMWindowController?
+
+    private static let bundleURLKey = "bundleURL"
+
+    override init() {
+        if let path = UserDefaults.standard.string(forKey: Self.bundleURLKey) {
+            bundle = VMBundle(url: URL(fileURLWithPath: path))
+        } else {
+            bundle = VMBundle()
+        }
+        super.init()
+    }
 
     var bundleExists: Bool { bundle.exists }
 
@@ -29,6 +40,37 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         try? bundle.delete()
     }
 
+    func selectBundle() {
+        let panel = NSOpenPanel()
+        panel.title = "Select VM Bundle"
+        panel.message = "Choose an existing .bundle directory."
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.begin { [weak self] response in
+            guard let self, response == .OK, let url = panel.url else { return }
+            self.bundle = VMBundle(url: url)
+            UserDefaults.standard.set(url.path, forKey: Self.bundleURLKey)
+        }
+    }
+
+    func newVM() {
+        let panel = NSSavePanel()
+        panel.title = "New Virtual Machine"
+        panel.message = "Choose a name and location for the new VM bundle."
+        panel.nameFieldStringValue = "Linux VM.bundle"
+        panel.canCreateDirectories = true
+        panel.begin { [weak self] response in
+            guard let self, response == .OK, var url = panel.url else { return }
+            if url.pathExtension.lowercased() != "bundle" {
+                url = url.appendingPathExtension("bundle")
+            }
+            self.bundle = VMBundle(url: url)
+            UserDefaults.standard.set(url.path, forKey: Self.bundleURLKey)
+            self.promptForISO()
+        }
+    }
+
     // MARK: - Private
 
     private func promptForISO() {
@@ -38,9 +80,6 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        if let isoType = UTType(filenameExtension: "iso") {
-            panel.allowedContentTypes = [isoType]
-        }
 
         panel.begin { [weak self] response in
             guard response == .OK, let url = panel.url else { return }
@@ -77,7 +116,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         vm.delegate = self
         virtualMachine = vm
 
-        let wc = VMWindowController(virtualMachine: vm)
+        let wc = VMWindowController(virtualMachine: vm, displayName: bundle.displayName)
         windowController = wc
         wc.show()
 

@@ -3,9 +3,24 @@ import Foundation
 struct VMBundle {
     let url: URL
 
+    init(url: URL) {
+        self.url = url
+    }
+
     init(name: String = "Linux VM") {
-        url = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("\(name).bundle")
+        self.init(url: FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("\(name).bundle"))
+    }
+
+    var displayName: String {
+        url.deletingPathExtension().lastPathComponent
+    }
+
+    var abbreviatedPath: String {
+        url.path.replacingOccurrences(
+            of: FileManager.default.homeDirectoryForCurrentUser.path,
+            with: "~"
+        )
     }
 
     var exists: Bool {
