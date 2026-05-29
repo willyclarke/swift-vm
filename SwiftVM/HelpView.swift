@@ -75,6 +75,31 @@ struct HelpView: View {
                 )
 
                 helpSection(
+                    icon: "cpu", color: .blue,
+                    title: "Rosetta — Run x86_64 Binaries",
+                    rows: [
+                        ("What it does",  "Rosetta lets the ARM64 guest transparently execute x86_64 ELF binaries — compilers, build tools, `docker build --platform linux/amd64`, and more. Enable the **Rosetta** checkbox in the VM card, then restart the VM."),
+                        ("!",             "The Rosetta tag is always `rosetta`. Use it exactly as shown in all commands below."),
+                        ("Requires",      "Rosetta must be installed on the Mac. If the checkbox is greyed out, run this in macOS Terminal:"),
+                        ("",              "`softwareupdate --install-rosetta`"),
+                        ("Mount point",   "Create the mount point inside the guest:"),
+                        ("",              "`sudo mkdir -p /media/rosetta`"),
+                        ("fstab",         "Add to `/etc/fstab` (must be read-only):"),
+                        ("",              "`rosetta  /media/rosetta  virtiofs  ro  0  0`"),
+                        ("",              "Then apply: `sudo mount -a`"),
+                        ("Register",      "Register Rosetta as the x86_64 ELF handler. Mount `binfmt_misc` first if needed:"),
+                        ("",              "`sudo mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc`"),
+                        ("",              "`echo ':rosetta:M::\\x7fELF\\x02\\x01\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x02\\x00\\x3e\\x00:\\xff\\xff\\xff\\xff\\xff\\xfe\\xfe\\x00\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xfe\\xff\\xff\\xff:/media/rosetta/rosetta:CF' | sudo tee /proc/sys/fs/binfmt_misc/register`"),
+                        ("Ubuntu",        "On Ubuntu, use `update-binfmts` for persistence across reboots:"),
+                        ("",              "`sudo apt install -y binfmt-support`"),
+                        ("",              "`sudo update-binfmts --install rosetta /media/rosetta/rosetta --magic \"\\x7fELF\\x02\\x01\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x02\\x00\\x3e\\x00\" --mask \"\\xff\\xff\\xff\\xff\\xff\\xfe\\xfe\\x00\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xfe\\xff\\xff\\xff\" --credentials yes --preserve no --fix-binary yes`"),
+                        ("Void Linux",    "For persistence on Void, add the `echo` register command to `/etc/rc.local` (create it if missing, make it executable with `chmod +x`)."),
+                        ("Verify",        "Confirm x86_64 binaries are handled by Rosetta:"),
+                        ("",              "`cat /proc/sys/fs/binfmt_misc/rosetta`"),
+                    ]
+                )
+
+                helpSection(
                     icon: "keyboard", color: .gray,
                     title: "Shortcuts",
                     rows: [

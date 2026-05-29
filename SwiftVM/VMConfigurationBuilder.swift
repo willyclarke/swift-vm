@@ -36,14 +36,25 @@ enum VMConfigurationBuilder {
         config.pointingDevices = [VZUSBScreenCoordinatePointingDeviceConfiguration()]
         config.consoleDevices = [spiceAgentConsole()]
 
-        if !vmConfig.sharedFolders.isEmpty {
-            config.directorySharingDevices = vmConfig.sharedFolders.map { folder in
+        var sharingDevices: [VZVirtioFileSystemDeviceConfiguration] =
+            vmConfig.sharedFolders.map { folder in
                 let dir = VZSharedDirectory(url: URL(fileURLWithPath: folder.path),
                                             readOnly: folder.readOnly)
                 let device = VZVirtioFileSystemDeviceConfiguration(tag: folder.mountTag)
                 device.share = VZSingleDirectoryShare(directory: dir)
                 return device
             }
+
+        if vmConfig.rosettaEnabled,
+           case .installed = VZLinuxRosettaDirectoryShare.availability,
+           let rosettaShare = try? VZLinuxRosettaDirectoryShare() {
+            let device = VZVirtioFileSystemDeviceConfiguration(tag: "rosetta")
+            device.share = rosettaShare
+            sharingDevices.append(device)
+        }
+
+        if !sharingDevices.isEmpty {
+            config.directorySharingDevices = sharingDevices
         }
 
         try config.validate()
@@ -133,6 +144,16 @@ enum VMConfigurationBuilder {
         port.attachment = VZSpiceAgentPortAttachment()
         device.ports[0] = port
         return device
+    }
+
+    // MARK: - Rosetta
+
+    static var isRosettaAvailable: Bool {
+        VZLinuxRosettaDirectoryShare.availability == .installed
+    }
+
+    static var isRosettaSupported: Bool {
+        VZLinuxRosettaDirectoryShare.availability != .notSupported
     }
 
     // MARK: - Resource options (for UI pickers)

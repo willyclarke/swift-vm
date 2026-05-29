@@ -41,11 +41,14 @@ struct VMConfig: Codable {
     var sharedFolders: [SharedFolder]
 
     var diskSizeGB: Int
+    var rosettaEnabled: Bool
 
-    init(cpuCount: Int, memoryGB: Int, diskSizeGB: Int = 64, sharedFolders: [SharedFolder] = []) {
+    init(cpuCount: Int, memoryGB: Int, diskSizeGB: Int = 64,
+         rosettaEnabled: Bool = false, sharedFolders: [SharedFolder] = []) {
         self.cpuCount = cpuCount
         self.memoryGB = memoryGB
         self.diskSizeGB = diskSizeGB
+        self.rosettaEnabled = rosettaEnabled
         self.sharedFolders = sharedFolders
     }
 
@@ -54,6 +57,7 @@ struct VMConfig: Codable {
         cpuCount = try c.decode(Int.self, forKey: .cpuCount)
         memoryGB = try c.decode(Int.self, forKey: .memoryGB)
         diskSizeGB = (try? c.decode(Int.self, forKey: .diskSizeGB)) ?? 64
+        rosettaEnabled = (try? c.decode(Bool.self, forKey: .rosettaEnabled)) ?? false
         sharedFolders = (try? c.decode([SharedFolder].self, forKey: .sharedFolders)) ?? []
     }
 

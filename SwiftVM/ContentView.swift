@@ -106,6 +106,19 @@ struct ContentView: View {
                 }
                 .controlSize(.small)
                 .disabled(manager.isRunning)
+
+                if VMConfigurationBuilder.isRosettaSupported {
+                    Toggle(isOn: $manager.vmConfig.rosettaEnabled) {
+                        Label("Rosetta (run x86_64 binaries)", systemImage: "cpu")
+                            .font(.caption)
+                    }
+                    .toggleStyle(.checkbox)
+                    .controlSize(.small)
+                    .disabled(manager.isRunning || !VMConfigurationBuilder.isRosettaAvailable)
+                    .help(VMConfigurationBuilder.isRosettaAvailable
+                          ? "Expose Rosetta to the ARM64 guest so it can run x86_64 binaries"
+                          : "Rosetta is not installed — run 'softwareupdate --install-rosetta' in Terminal")
+                }
             }
 
             Spacer()
