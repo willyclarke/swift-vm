@@ -50,6 +50,25 @@ struct HelpView: View {
                 )
 
                 helpSection(
+                    icon: "folder.badge.gearshape", color: .indigo,
+                    title: "Folder Sharing",
+                    rows: [
+                        ("Add folder",    "Click **Add Shared Folder…** in the VM card. The chosen host folder is shared with the guest as a VirtioFS device tagged `host-share`."),
+                        ("Mount point",   "Create the mount point inside the guest (both distros):"),
+                        ("",              "`sudo mkdir -p /media/host`"),
+                        ("Void Linux",    "Install the kernel module:"),
+                        ("",              "`sudo xbps-install -y virtiofs`"),
+                        ("",              "Then mount:"),
+                        ("",              "`sudo mount -t virtiofs host-share /media/host`"),
+                        ("Ubuntu 24.04",  "The `virtiofs` module ships with the Ubuntu kernel. Mount with:"),
+                        ("",              "`sudo mount -t virtiofs host-share /media/host`"),
+                        ("Auto-mount",    "To mount automatically on boot, add to `/etc/fstab`:"),
+                        ("",              "`host-share /media/host virtiofs defaults 0 0`"),
+                        ("Permissions",   "The folder is read-write. Files are owned by the user that started SwiftVM on the host."),
+                    ]
+                )
+
+                helpSection(
                     icon: "keyboard", color: .gray,
                     title: "Shortcuts",
                     rows: [
@@ -112,11 +131,34 @@ struct HelpView: View {
                             .font(.subheadline.bold())
                             .frame(width: 110, alignment: .leading)
                             .padding(.vertical, 7)
-                        Text(.init(row.1))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 7)
+                        if row.0.isEmpty {
+                            HStack(spacing: 6) {
+                                Text(.init(row.1))
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundStyle(.primary)
+                                    .textSelection(.enabled)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                Button {
+                                    let raw = row.1.trimmingCharacters(in: CharacterSet(charactersIn: "`"))
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(raw, forType: .string)
+                                } label: {
+                                    Image(systemName: "doc.on.doc")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .buttonStyle(.borderless)
+                                .help("Copy to clipboard")
+                            }
+                            .padding(.vertical, 5)
+                        } else {
+                            Text(.init(row.1))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 7)
+                        }
                     }
                     .padding(.horizontal, 12)
                     .background(index % 2 == 0 ? Color.clear : Color.primary.opacity(0.03))

@@ -116,6 +116,23 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         }
     }
 
+    func selectSharedDirectory() {
+        let panel = NSOpenPanel()
+        panel.title = "Select Shared Folder"
+        panel.message = "Choose a folder to share with the guest VM."
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.begin { [weak self] response in
+            guard let self, response == .OK, let url = panel.url else { return }
+            self.vmConfig.sharedDirectoryPath = url.path
+        }
+    }
+
+    func clearSharedDirectory() {
+        vmConfig.sharedDirectoryPath = nil
+    }
+
     func newVM() {
         let panel = NSSavePanel()
         panel.title = "New Virtual Machine"

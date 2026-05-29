@@ -3,6 +3,7 @@ import Foundation
 struct VMConfig: Codable {
     var cpuCount: Int
     var memoryGB: Int
+    var sharedDirectoryPath: String?
 }
 
 struct VMBundle {
@@ -45,7 +46,8 @@ struct VMBundle {
         }
         return VMConfig(
             cpuCount: max(1, ProcessInfo.processInfo.processorCount - 1),
-            memoryGB: 4
+            memoryGB: 4,
+            sharedDirectoryPath: nil
         )
     }
 
