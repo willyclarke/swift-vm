@@ -117,21 +117,47 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         }
     }
 
-    func selectSharedDirectory() {
-        let panel = NSOpenPanel()
-        panel.title = "Select Shared Folder"
-        panel.message = "Choose a folder to share with the guest VM."
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.begin { [weak self] response in
-            guard let self, response == .OK, let url = panel.url else { return }
-            self.vmConfig.sharedDirectoryPath = url.path
+    func addSharedFolder() {
+        openFolderPicker(title: "Select Shared Folder") { [weak self] url in
+            guard let self else { return }
+            let existing = self.vmConfig.sharedFolders.map(\.mountTag)
+            self.vmConfig.sharedFolders.append(SharedFolder(url: url, existingTags: existing))
         }
     }
 
-    func clearSharedDirectory() {
-        vmConfig.sharedDirectoryPath = nil
+    func changeSharedFolder(id: UUID) {
+        let current = vmConfig.sharedFolders.first(where: { $0.id == id })
+        openFolderPicker(
+            title: "Change Shared Folder",
+            startingAt: current.map { URL(fileURLWithPath: $0.path).deletingLastPathComponent() }
+        ) { [weak self] url in
+            guard let self, let i = self.vmConfig.sharedFolders.firstIndex(where: { $0.id == id })
+            else { return }
+            self.vmConfig.sharedFolders[i].path = url.path
+        }
+    }
+
+    func removeSharedFolder(id: UUID) {
+        vmConfig.sharedFolders.removeAll { $0.id == id }
+    }
+
+    func toggleSharedFolderReadOnly(id: UUID) {
+        guard let i = vmConfig.sharedFolders.firstIndex(where: { $0.id == id }) else { return }
+        vmConfig.sharedFolders[i].readOnly.toggle()
+    }
+
+    private func openFolderPicker(title: String, startingAt dir: URL? = nil,
+                                  completion: @escaping (URL) -> Void) {
+        let panel = NSOpenPanel()
+        panel.title = title
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.directoryURL = dir
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            completion(url)
+        }
     }
 
     func newVM() {

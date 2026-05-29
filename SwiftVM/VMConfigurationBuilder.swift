@@ -36,13 +36,14 @@ enum VMConfigurationBuilder {
         config.pointingDevices = [VZUSBScreenCoordinatePointingDeviceConfiguration()]
         config.consoleDevices = [spiceAgentConsole()]
 
-        if let path = vmConfig.sharedDirectoryPath {
-            let shareURL = URL(fileURLWithPath: path)
-            let sharedDir = VZSharedDirectory(url: shareURL, readOnly: false)
-            let share = VZSingleDirectoryShare(directory: sharedDir)
-            let fsDevice = VZVirtioFileSystemDeviceConfiguration(tag: "host-share")
-            fsDevice.share = share
-            config.directorySharingDevices = [fsDevice]
+        if !vmConfig.sharedFolders.isEmpty {
+            config.directorySharingDevices = vmConfig.sharedFolders.map { folder in
+                let dir = VZSharedDirectory(url: URL(fileURLWithPath: folder.path),
+                                            readOnly: folder.readOnly)
+                let device = VZVirtioFileSystemDeviceConfiguration(tag: folder.mountTag)
+                device.share = VZSingleDirectoryShare(directory: dir)
+                return device
+            }
         }
 
         try config.validate()

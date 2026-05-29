@@ -53,18 +53,24 @@ struct HelpView: View {
                     icon: "folder.badge.gearshape", color: .indigo,
                     title: "Folder Sharing",
                     rows: [
-                        ("Add folder",    "Click **Add Shared Folder…** in the VM card. The chosen host folder is shared with the guest as a VirtioFS device tagged `host-share`."),
-                        ("Mount point",   "Create the mount point inside the guest (both distros):"),
-                        ("",              "`sudo mkdir -p /media/host`"),
-                        ("Void Linux",    "Install the kernel module:"),
-                        ("",              "`sudo xbps-install -y virtiofs`"),
-                        ("",              "Then mount:"),
-                        ("",              "`sudo mount -t virtiofs host-share /media/host`"),
-                        ("Ubuntu 24.04",  "The `virtiofs` module ships with the Ubuntu kernel. Mount with:"),
-                        ("",              "`sudo mount -t virtiofs host-share /media/host`"),
-                        ("Auto-mount",    "To mount automatically on boot, add to `/etc/fstab`:"),
-                        ("",              "`host-share /media/host virtiofs defaults 0 0`"),
-                        ("Permissions",   "The folder is read-write. Files are owned by the user that started SwiftVM on the host."),
+                        ("Add folder",    "Click **Add Shared Folder…** in the VM card. Multiple folders are supported. Each folder gets a unique mount tag (derived from the folder name) shown in small text below its path — use that tag in the mount commands below."),
+                        ("RO / RW",       "Click the lock icon on a folder row to toggle between read-write (open lock) and read-only (closed lock, shown in orange)."),
+                        ("Change",        "Click the pencil icon to pick a different host folder while keeping the same mount tag and settings."),
+                        ("!",             "The tag shown in small text below each folder path in the VM card is the **only link** between SwiftVM and the guest. It must match exactly in every command. For example, if the VM card shows `downloads`, every `<tag>` below becomes `downloads`."),
+                        ("Mount point",   "Create the mount point inside the guest (replace `<tag>` with the tag shown in the VM card):"),
+                        ("",              "`sudo mkdir -p /media/<tag>`"),
+                        ("Void Linux",    "The `virtiofs` module ships with the standard `linux` package — no separate install needed. Load it:"),
+                        ("",              "`sudo modprobe virtiofs`"),
+                        ("",              "Auto-load on boot:"),
+                        ("",              "`echo virtiofs | sudo tee /etc/modules-load.d/virtiofs.conf`"),
+                        ("",              "Mount the share:"),
+                        ("",              "`sudo mount -t virtiofs <tag> /media/<tag>`"),
+                        ("Ubuntu 24.04",  "The `virtiofs` module ships with the Ubuntu kernel — no install needed. Mount with:"),
+                        ("",              "`sudo mount -t virtiofs <tag> /media/<tag>`"),
+                        ("Auto-mount",    "Append one line per shared folder to `/etc/fstab` — the format is the same on Void Linux and Ubuntu:"),
+                        ("",              "`<tag>  /media/<tag>  virtiofs  defaults  0  0`"),
+                        ("",              "Then run `sudo mount -a` to mount without rebooting."),
+                        ("Permissions",   "Files are owned by the user that started SwiftVM on the host. Use the lock toggle to restrict a folder to read-only inside the guest."),
                     ]
                 )
 
@@ -126,42 +132,62 @@ struct HelpView: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                    HStack(alignment: .top, spacing: 12) {
-                        Text(row.0)
-                            .font(.subheadline.bold())
-                            .frame(width: 110, alignment: .leading)
-                            .padding(.vertical, 7)
-                        if row.0.isEmpty {
-                            HStack(spacing: 6) {
-                                Text(.init(row.1))
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundStyle(.primary)
-                                    .textSelection(.enabled)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                Button {
-                                    let raw = row.1.trimmingCharacters(in: CharacterSet(charactersIn: "`"))
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString(raw, forType: .string)
-                                } label: {
-                                    Image(systemName: "doc.on.doc")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .buttonStyle(.borderless)
-                                .help("Copy to clipboard")
-                            }
-                            .padding(.vertical, 5)
-                        } else {
+                    if row.0 == "!" {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "link")
+                                .font(.caption.bold())
+                                .foregroundStyle(.orange)
+                                .padding(.top, 1)
                             Text(.init(row.1))
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.orange)
                                 .textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 7)
                         }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.orange.opacity(0.08),
+                                    in: RoundedRectangle(cornerRadius: 6))
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                    } else {
+                        HStack(alignment: .top, spacing: 12) {
+                            Text(row.0)
+                                .font(.subheadline.bold())
+                                .frame(width: 110, alignment: .leading)
+                                .padding(.vertical, 7)
+                            if row.0.isEmpty {
+                                HStack(spacing: 6) {
+                                    Text(.init(row.1))
+                                        .font(.system(.caption, design: .monospaced))
+                                        .foregroundStyle(.primary)
+                                        .textSelection(.enabled)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    Button {
+                                        let raw = row.1.trimmingCharacters(in: CharacterSet(charactersIn: "`"))
+                                        NSPasteboard.general.clearContents()
+                                        NSPasteboard.general.setString(raw, forType: .string)
+                                    } label: {
+                                        Image(systemName: "doc.on.doc")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .buttonStyle(.borderless)
+                                    .help("Copy to clipboard")
+                                }
+                                .padding(.vertical, 5)
+                            } else {
+                                Text(.init(row.1))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .textSelection(.enabled)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.vertical, 7)
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .background(index % 2 == 0 ? Color.clear : Color.primary.opacity(0.03))
                     }
-                    .padding(.horizontal, 12)
-                    .background(index % 2 == 0 ? Color.clear : Color.primary.opacity(0.03))
                 }
             }
             .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))

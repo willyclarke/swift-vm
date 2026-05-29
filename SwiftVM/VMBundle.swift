@@ -1,9 +1,57 @@
 import Foundation
 
+struct SharedFolder: Codable, Identifiable {
+    var id: UUID
+    var path: String
+    var readOnly: Bool
+    var mountTag: String
+
+    init(url: URL, readOnly: Bool = false, existingTags: [String] = []) {
+        self.id = UUID()
+        self.path = url.path
+        self.readOnly = readOnly
+        self.mountTag = Self.makeTag(for: url, avoiding: existingTags)
+    }
+
+    static func makeTag(for url: URL, avoiding existing: [String]) -> String {
+        var sanitized = ""
+        for ch in url.lastPathComponent.lowercased() {
+            if ch.isLetter || ch.isNumber {
+                sanitized.append(ch)
+            } else if !sanitized.isEmpty && sanitized.last != "-" {
+                sanitized.append("-")
+            }
+        }
+        sanitized = String(
+            sanitized.trimmingCharacters(in: CharacterSet(charactersIn: "-")).prefix(36))
+        let base = sanitized.isEmpty ? "share" : sanitized
+        var tag = base
+        var i = 1
+        while existing.contains(tag) {
+            tag = "\(base)-\(i)"
+            i += 1
+        }
+        return tag
+    }
+}
+
 struct VMConfig: Codable {
     var cpuCount: Int
     var memoryGB: Int
-    var sharedDirectoryPath: String?
+    var sharedFolders: [SharedFolder]
+
+    init(cpuCount: Int, memoryGB: Int, sharedFolders: [SharedFolder] = []) {
+        self.cpuCount = cpuCount
+        self.memoryGB = memoryGB
+        self.sharedFolders = sharedFolders
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        cpuCount = try c.decode(Int.self, forKey: .cpuCount)
+        memoryGB = try c.decode(Int.self, forKey: .memoryGB)
+        sharedFolders = (try? c.decode([SharedFolder].self, forKey: .sharedFolders)) ?? []
+    }
 }
 
 struct VMBundle {
@@ -46,8 +94,7 @@ struct VMBundle {
         }
         return VMConfig(
             cpuCount: max(1, ProcessInfo.processInfo.processorCount - 1),
-            memoryGB: 4,
-            sharedDirectoryPath: nil
+            memoryGB: 4
         )
     }
 
