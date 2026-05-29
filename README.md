@@ -17,6 +17,32 @@ A macOS app that creates and runs GUI Linux virtual machines using Apple's [Virt
 
 On first launch, click **Start** to install the OS. The app will prompt for an ISO and create a VM bundle at `~/Linux VM.bundle/`.
 
+## Installing and distributing
+
+A `Makefile` is provided for building outside Xcode:
+
+```bash
+make build     # compile Release .app
+make install   # build and copy to /Applications
+make dmg       # build and package as SwiftVM-<version>.dmg
+make notarize  # submit DMG to Apple notarization and staple ticket
+make clean     # remove build artefacts
+```
+
+**Notarization** (`make notarize`) requires:
+- A **Developer ID Application** certificate in your keychain (set in Xcode's Signing & Capabilities instead of the default Development certificate)
+- **Hardened Runtime** enabled in Signing & Capabilities
+- A stored `notarytool` credential profile — run once:
+
+```bash
+xcrun notarytool store-credentials "swiftvm-notarytool" \
+  --apple-id "you@example.com" \
+  --team-id "XXXXXXXXXX" \
+  --password "<app-specific-password>"
+```
+
+An app-specific password can be generated at [appleid.apple.com](https://appleid.apple.com).
+
 ## Installing Void Linux
 
 The Void Linux live ISO does not include `void-installer`. Install manually:
@@ -82,7 +108,8 @@ The MAC address is persisted across reboots so the VM receives the same DHCP lea
 ├── Disk.img          # 64 GB sparse disk image
 ├── NVRAM             # EFI variable store
 ├── MachineIdentifier # VZGenericMachineIdentifier data
-└── MACAddress        # Persistent MAC (plain text, e.g. "aa:bb:cc:dd:ee:ff")
+├── MACAddress        # Persistent MAC (plain text, e.g. "aa:bb:cc:dd:ee:ff")
+└── Config.json       # Per-VM CPU and memory settings
 ```
 
 VM bundles are excluded from git via `.gitignore`.
