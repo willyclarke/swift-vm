@@ -112,6 +112,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
 
     nonisolated func guestDidStop(_ virtualMachine: VZVirtualMachine) {
         MainActor.assumeIsolated {
+            self.windowController?.window?.close()
             self.virtualMachine = nil
             self.windowController = nil
             self.isRunning = false
@@ -120,6 +121,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
 
     nonisolated func virtualMachine(_ virtualMachine: VZVirtualMachine, didStopWithError error: Error) {
         MainActor.assumeIsolated {
+            self.windowController?.window?.close()
             self.virtualMachine = nil
             self.windowController = nil
             self.isRunning = false

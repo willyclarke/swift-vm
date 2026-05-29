@@ -38,6 +38,12 @@ final class VMWindowController: NSWindowController, NSWindowDelegate {
     func windowDidBecomeMain(_ notification: Notification) {
         window?.makeFirstResponder(vmView)
     }
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        guard let vm = vmView.virtualMachine, vm.canStop else { return true }
+        vm.stop { _ in }
+        return false
+    }
 }
 
 // Forwards the first click into the VM rather than consuming it to focus the window.
