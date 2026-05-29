@@ -89,6 +89,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
+        panel.directoryURL = bundle.url.deletingLastPathComponent()
         panel.begin { [weak self] response in
             guard let self, response == .OK, let url = panel.url else { return }
             self.bundle = VMBundle(url: url)
