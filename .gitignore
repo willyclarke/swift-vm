@@ -17,5 +17,11 @@ build/
 # VM bundles — these are large disk images, never commit them
 *.bundle/
 
+# Apple sample code — has its own license, not MIT
+apple-examples/
+
+# Compiled CLI binaries
+scripts/**/.swiftvm-cli
+
 # macOS
 .DS_Store
