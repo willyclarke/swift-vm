@@ -95,6 +95,14 @@ struct ContentView: View {
                 .disabled(manager.isRunning)
 
                 Button {
+                    manager.moveBundle()
+                } label: {
+                    Label("Move…", systemImage: "arrow.forward")
+                }
+                .help("Move the VM bundle to a new location")
+                .disabled(manager.isRunning || !manager.bundleExists)
+
+                Button {
                     manager.newVM()
                 } label: {
                     Label("New…", systemImage: "plus.circle.fill")

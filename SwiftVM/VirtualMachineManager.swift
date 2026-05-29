@@ -10,7 +10,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
     @Published var errorMessage: String?
     @Published var bundle: VMBundle {
         didSet {
-            UserDefaults.standard.set(bundle.url.path, forKey: Self.bundleURLKey)
+            Self.saveBookmark(for: bundle.url)
             vmConfig = bundle.loadConfig()
         }
     }
@@ -24,11 +24,16 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
     private var virtualMachine: VZVirtualMachine?
     private var windowController: VMWindowController?
 
+    // "bundleURL" key kept for migration from older builds only.
+    private static let bundleBookmarkKey = "bundleBookmark"
     private static let bundleURLKey = "bundleURL"
 
     override init() {
         let b: VMBundle
-        if let path = UserDefaults.standard.string(forKey: Self.bundleURLKey) {
+        if let data = UserDefaults.standard.data(forKey: Self.bundleBookmarkKey),
+           let url = Self.resolveBookmark(data) {
+            b = VMBundle(url: url)
+        } else if let path = UserDefaults.standard.string(forKey: Self.bundleURLKey) {
             b = VMBundle(url: URL(fileURLWithPath: path))
         } else {
             b = VMBundle()
@@ -36,6 +41,29 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         bundle = b
         vmConfig = b.loadConfig()
         super.init()
+        // Migrate path → bookmark, or refresh on first launch.
+        if b.exists {
+            Self.saveBookmark(for: b.url)
+            UserDefaults.standard.removeObject(forKey: Self.bundleURLKey)
+        }
+    }
+
+    // MARK: - Bookmark helpers
+
+    private static func saveBookmark(for url: URL) {
+        guard let data = try? url.bookmarkData(
+            options: [], includingResourceValuesForKeys: nil, relativeTo: nil
+        ) else { return }
+        UserDefaults.standard.set(data, forKey: bundleBookmarkKey)
+    }
+
+    private static func resolveBookmark(_ data: Data) -> URL? {
+        var isStale = false
+        guard let url = try? URL(
+            resolvingBookmarkData: data, options: [], relativeTo: nil, bookmarkDataIsStale: &isStale
+        ) else { return nil }
+        if isStale { saveBookmark(for: url) }
+        return url
     }
 
     var bundleExists: Bool { bundle.exists }
@@ -64,6 +92,27 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         panel.begin { [weak self] response in
             guard let self, response == .OK, let url = panel.url else { return }
             self.bundle = VMBundle(url: url)
+        }
+    }
+
+    func moveBundle() {
+        let panel = NSSavePanel()
+        panel.title = "Move VM Bundle"
+        panel.message = "Choose a new name and location for \"\(bundle.displayName)\"."
+        panel.nameFieldStringValue = bundle.url.lastPathComponent
+        panel.directoryURL = bundle.url.deletingLastPathComponent()
+        panel.canCreateDirectories = true
+        panel.begin { [weak self] response in
+            guard let self, response == .OK, var url = panel.url else { return }
+            if url.pathExtension.lowercased() != "bundle" {
+                url = url.appendingPathExtension("bundle")
+            }
+            do {
+                try FileManager.default.moveItem(at: self.bundle.url, to: url)
+                self.bundle = VMBundle(url: url)
+            } catch {
+                self.showError(error)
+            }
         }
     }
 
@@ -103,6 +152,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         isStarting = true
         do {
             try bundle.create()
+            Self.saveBookmark(for: bundle.url)
             try bundle.saveConfig(vmConfig)
             let config = try VMConfigurationBuilder.build(bundle: bundle, installISO: isoURL, vmConfig: vmConfig)
             launch(configuration: config)
