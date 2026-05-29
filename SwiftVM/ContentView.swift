@@ -55,7 +55,7 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 28)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(manager.bundle.displayName)
                     .font(.headline)
                 Text(manager.bundle.abbreviatedPath)
@@ -63,6 +63,24 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .truncationMode(.middle)
+                HStack(spacing: 8) {
+                    Picker("CPU", selection: $manager.vmConfig.cpuCount) {
+                        ForEach(VMConfigurationBuilder.availableCPUCounts, id: \.self) { n in
+                            Text("\(n) vCPU\(n == 1 ? "" : "s")").tag(n)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                    Picker("RAM", selection: $manager.vmConfig.memoryGB) {
+                        ForEach(VMConfigurationBuilder.availableMemoryGBOptions, id: \.self) { gb in
+                            Text("\(gb) GB").tag(gb)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                }
+                .controlSize(.small)
+                .disabled(manager.isRunning)
             }
 
             Spacer()

@@ -4,10 +4,10 @@ enum VMConfigurationBuilder {
 
     /// Build a complete `VZVirtualMachineConfiguration`.
     /// Pass a non-nil `installISO` for a first-time install; pass `nil` to boot an existing image.
-    static func build(bundle: VMBundle, installISO: URL?) throws -> VZVirtualMachineConfiguration {
+    static func build(bundle: VMBundle, installISO: URL?, vmConfig: VMConfig) throws -> VZVirtualMachineConfiguration {
         let config = VZVirtualMachineConfiguration()
-        config.cpuCount = cpuCount()
-        config.memorySize = memorySize()
+        config.cpuCount = clampedCPUCount(vmConfig.cpuCount)
+        config.memorySize = clampedMemorySize(UInt64(vmConfig.memoryGB) * 1_024 * 1_024 * 1_024)
 
         let platform = VZGenericPlatformConfiguration()
         let bootloader = VZEFIBootLoader()
@@ -125,19 +125,31 @@ enum VMConfigurationBuilder {
         return device
     }
 
-    // MARK: - Resource sizing
+    // MARK: - Resource options (for UI pickers)
 
-    private static func cpuCount() -> Int {
-        let total = ProcessInfo.processInfo.processorCount
-        let count = max(1, total - 1)
-        return min(max(count, VZVirtualMachineConfiguration.minimumAllowedCPUCount),
-                   VZVirtualMachineConfiguration.maximumAllowedCPUCount)
+    static var availableCPUCounts: [Int] {
+        let maxCount = min(ProcessInfo.processInfo.processorCount,
+                           VZVirtualMachineConfiguration.maximumAllowedCPUCount)
+        let minCount = VZVirtualMachineConfiguration.minimumAllowedCPUCount
+        return Array(minCount...maxCount)
     }
 
-    private static func memorySize() -> UInt64 {
-        let size: UInt64 = 4 * 1_024 * 1_024 * 1_024
-        return min(max(size, VZVirtualMachineConfiguration.minimumAllowedMemorySize),
-                   VZVirtualMachineConfiguration.maximumAllowedMemorySize)
+    static var availableMemoryGBOptions: [Int] {
+        let maxBytes = VZVirtualMachineConfiguration.maximumAllowedMemorySize
+        let maxGB = Int(maxBytes / (1_024 * 1_024 * 1_024))
+        return [1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192].filter { $0 <= maxGB }
+    }
+
+    // MARK: - Resource clamping
+
+    private static func clampedCPUCount(_ count: Int) -> Int {
+        min(max(count, VZVirtualMachineConfiguration.minimumAllowedCPUCount),
+            VZVirtualMachineConfiguration.maximumAllowedCPUCount)
+    }
+
+    private static func clampedMemorySize(_ bytes: UInt64) -> UInt64 {
+        min(max(bytes, VZVirtualMachineConfiguration.minimumAllowedMemorySize),
+            VZVirtualMachineConfiguration.maximumAllowedMemorySize)
     }
 }
 

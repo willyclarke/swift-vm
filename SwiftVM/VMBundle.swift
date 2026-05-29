@@ -1,5 +1,10 @@
 import Foundation
 
+struct VMConfig: Codable {
+    var cpuCount: Int
+    var memoryGB: Int
+}
+
 struct VMBundle {
     let url: URL
 
@@ -27,10 +32,27 @@ struct VMBundle {
         FileManager.default.fileExists(atPath: url.path)
     }
 
-    var diskImageURL: URL        { url.appendingPathComponent("Disk.img") }
-    var nvramURL: URL            { url.appendingPathComponent("NVRAM") }
+    var diskImageURL: URL         { url.appendingPathComponent("Disk.img") }
+    var nvramURL: URL             { url.appendingPathComponent("NVRAM") }
     var machineIdentifierURL: URL { url.appendingPathComponent("MachineIdentifier") }
-    var macAddressURL: URL       { url.appendingPathComponent("MACAddress") }
+    var macAddressURL: URL        { url.appendingPathComponent("MACAddress") }
+    var configURL: URL            { url.appendingPathComponent("Config.json") }
+
+    func loadConfig() -> VMConfig {
+        if let data = try? Data(contentsOf: configURL),
+           let config = try? JSONDecoder().decode(VMConfig.self, from: data) {
+            return config
+        }
+        return VMConfig(
+            cpuCount: max(1, ProcessInfo.processInfo.processorCount - 1),
+            memoryGB: 4
+        )
+    }
+
+    func saveConfig(_ config: VMConfig) throws {
+        let data = try JSONEncoder().encode(config)
+        try data.write(to: configURL, options: .atomic)
+    }
 
     func create() throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: false)

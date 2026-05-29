@@ -8,7 +8,18 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
     @Published var isStarting = false
     @Published var hasError = false
     @Published var errorMessage: String?
-    @Published var bundle: VMBundle
+    @Published var bundle: VMBundle {
+        didSet {
+            UserDefaults.standard.set(bundle.url.path, forKey: Self.bundleURLKey)
+            vmConfig = bundle.loadConfig()
+        }
+    }
+    @Published var vmConfig: VMConfig {
+        didSet {
+            guard bundle.exists else { return }
+            try? bundle.saveConfig(vmConfig)
+        }
+    }
 
     private var virtualMachine: VZVirtualMachine?
     private var windowController: VMWindowController?
@@ -16,11 +27,14 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
     private static let bundleURLKey = "bundleURL"
 
     override init() {
+        let b: VMBundle
         if let path = UserDefaults.standard.string(forKey: Self.bundleURLKey) {
-            bundle = VMBundle(url: URL(fileURLWithPath: path))
+            b = VMBundle(url: URL(fileURLWithPath: path))
         } else {
-            bundle = VMBundle()
+            b = VMBundle()
         }
+        bundle = b
+        vmConfig = b.loadConfig()
         super.init()
     }
 
@@ -50,7 +64,6 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         panel.begin { [weak self] response in
             guard let self, response == .OK, let url = panel.url else { return }
             self.bundle = VMBundle(url: url)
-            UserDefaults.standard.set(url.path, forKey: Self.bundleURLKey)
         }
     }
 
@@ -66,7 +79,6 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
                 url = url.appendingPathExtension("bundle")
             }
             self.bundle = VMBundle(url: url)
-            UserDefaults.standard.set(url.path, forKey: Self.bundleURLKey)
             self.promptForISO()
         }
     }
@@ -91,7 +103,8 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         isStarting = true
         do {
             try bundle.create()
-            let config = try VMConfigurationBuilder.build(bundle: bundle, installISO: isoURL)
+            try bundle.saveConfig(vmConfig)
+            let config = try VMConfigurationBuilder.build(bundle: bundle, installISO: isoURL, vmConfig: vmConfig)
             launch(configuration: config)
         } catch {
             isStarting = false
@@ -103,7 +116,7 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
     private func boot() {
         isStarting = true
         do {
-            let config = try VMConfigurationBuilder.build(bundle: bundle, installISO: nil)
+            let config = try VMConfigurationBuilder.build(bundle: bundle, installISO: nil, vmConfig: vmConfig)
             launch(configuration: config)
         } catch {
             isStarting = false
