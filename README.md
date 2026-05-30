@@ -116,14 +116,18 @@ VM bundles are excluded from git via `.gitignore`.
 
 ## Devices configured
 
-| Device | Type |
-|---|---|
-| CPU | All cores minus one, min 1 |
-| RAM | 4 GB |
-| Disk | VirtIO block (`Disk.img`) |
-| Network | VirtIO NAT |
-| Graphics | VirtIO GPU (GUI app only) |
-| Audio | VirtIO sound (GUI app only) |
-| Keyboard | USB (GUI app only) |
-| Pointer | USB (GUI app only) |
+| Device    | Type                              |
+|---        |---                                |
+| CPU       | All cores minus one, min 1        |
+| RAM       | 4 GB                              |
+| Disk      | VirtIO block (`Disk.img`)         |
+| Network   | VirtIO NAT                        |
+| Graphics  | VirtIO GPU (GUI app only)         |
+| Audio     | VirtIO sound (GUI app only)       |
+| Keyboard  | USB (GUI app only)                |
+| Pointer   | USB (GUI app only)                |
 | Clipboard | SPICE console port (GUI app only) |
+
+## License
+
+MIT — see [LICENSE](LICENSE).
