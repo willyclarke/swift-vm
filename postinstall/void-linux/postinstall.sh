@@ -70,6 +70,11 @@ Exec=pipewire-pulse
 NoDisplay=true
 EOF
 
+echo "==> Generating en_US.UTF-8 locale..."
+sudo xbps-install -y glibc-locales
+sudo sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/default/libc-locales
+sudo xbps-reconfigure -f glibc-locales
+
 echo "==> Setting up GRUB font for HiDPI / Retina display..."
 sudo grub-mkfont -s 64 -o /boot/grub/fonts/large.pf2 \
     /usr/share/fonts/TTF/DejaVuSansMono.ttf
