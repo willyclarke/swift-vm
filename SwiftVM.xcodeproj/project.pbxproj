@@ -14,6 +14,8 @@
 		AA000000000000240000AABB /* VMConfigurationBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000150000AABB /* VMConfigurationBuilder.swift */; };
 		AA0000000000002B0000AABB /* VMWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001B0000AABB /* VMWindowController.swift */; };
 		AA0000000000002C0000AABB /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001C0000AABB /* HelpView.swift */; };
+		AA0000000000002D0000AABB /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001D0000AABB /* AboutView.swift */; };
+		AA0000000000002E0000AABB /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001E0000AABB /* BuildInfo.swift */; };
 		AA000000000000260000AABB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000170000AABB /* Assets.xcassets */; };
 		AA000000000000270000AABB /* Virtualization.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000000000001A0000AABB /* Virtualization.framework */; };
 /* End PBXBuildFile section */
@@ -31,6 +33,8 @@
 		AA0000000000001A0000AABB /* Virtualization.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Virtualization.framework; path = System/Library/Frameworks/Virtualization.framework; sourceTree = SDKROOT; };
 		AA0000000000001B0000AABB /* VMWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VMWindowController.swift; sourceTree = "<group>"; };
 		AA0000000000001C0000AABB /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
+		AA0000000000001D0000AABB /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		AA0000000000001E0000AABB /* BuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildInfo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +71,8 @@
 				AA000000000000190000AABB /* Info.plist */,
 				AA0000000000001B0000AABB /* VMWindowController.swift */,
 				AA0000000000001C0000AABB /* HelpView.swift */,
+				AA0000000000001D0000AABB /* AboutView.swift */,
+				AA0000000000001E0000AABB /* BuildInfo.swift */,
 			);
 			path = SwiftVM;
 			sourceTree = "<group>";
@@ -94,6 +100,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA000000000000510000AABB /* Build configuration list for PBXNativeTarget "SwiftVM" */;
 			buildPhases = (
+				AA0000000000003F0000AABB /* Update Build Info */,
 				AA000000000000300000AABB /* Sources */,
 				AA000000000000310000AABB /* Frameworks */,
 				AA000000000000320000AABB /* Resources */,
@@ -163,10 +170,34 @@
 				AA000000000000240000AABB /* VMConfigurationBuilder.swift in Sources */,
 					AA0000000000002B0000AABB /* VMWindowController.swift in Sources */,
 				AA0000000000002C0000AABB /* HelpView.swift in Sources */,
+				AA0000000000002D0000AABB /* AboutView.swift in Sources */,
+				AA0000000000002E0000AABB /* BuildInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AA0000000000003F0000AABB /* Update Build Info */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Update Build Info";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/SwiftVM/BuildInfo.swift",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "bash \"$SRCROOT/scripts/update-build-info.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		AA000000000000600000AABB /* Debug */ = {

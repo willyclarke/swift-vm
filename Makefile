@@ -22,7 +22,7 @@ help:
 	@echo "  clean     — remove all build artefacts"
 
 ## Compile a Release build.
-build:
+build: _update-build-info
 	xcodebuild \
 	  -project "$(PROJECT)" \
 	  -scheme "$(SCHEME)" \
@@ -69,6 +69,9 @@ notarize: dmg
 	  --wait
 	xcrun stapler staple "$(DMG)"
 	@echo "Notarized and stapled $(DMG)"
+
+_update-build-info:
+	@bash scripts/update-build-info.sh
 
 ## Remove all build artefacts.
 clean:

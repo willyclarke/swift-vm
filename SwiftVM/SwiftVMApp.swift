@@ -11,6 +11,7 @@ struct SwiftVMApp: App {
         .defaultSize(width: 1280, height: 800)
         .commands {
             HelpCommands()
+            AboutCommands()
         }
 
         Window("SwiftVM Help", id: "help") {
@@ -18,6 +19,23 @@ struct SwiftVMApp: App {
         }
         .windowResizability(.contentSize)
         .defaultSize(width: 600, height: 680)
+
+        Window("About SwiftVM", id: "about") {
+            AboutView()
+        }
+        .windowResizability(.contentSize)
+    }
+}
+
+struct AboutCommands: Commands {
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some Commands {
+        CommandGroup(replacing: .appInfo) {
+            Button("About SwiftVM") {
+                openWindow(id: "about")
+            }
+        }
     }
 }
 
