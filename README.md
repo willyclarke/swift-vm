@@ -13,7 +13,8 @@ A macOS app that creates and runs GUI Linux virtual machines using Apple's [Virt
 
 1. Open `SwiftVM.xcodeproj` in Xcode.
 2. In the project settings → **Signing & Capabilities**, set your **Team**.
-3. Press **⌘R** to build and run.
+3. Change the **Bundle Identifier** from `com.example.SwiftVM` to something unique to you (e.g. `com.yourname.SwiftVM`). This must match your Apple Developer account.
+4. Press **⌘R** to build and run.
 
 On first launch, click **Start** to install the OS. The app will prompt for an ISO and create a VM bundle at `~/Linux VM.bundle/`.
 
