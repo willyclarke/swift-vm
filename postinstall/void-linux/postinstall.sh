@@ -22,7 +22,9 @@ sudo xbps-install -y \
     wireplumber-elogind \
     spice-vdagent \
     grub-utils \
-    dejavu-fonts-ttf
+    dejavu-fonts-ttf \
+    clang \
+    clang-tools-extra21
 
 echo "==> Enabling system services..."
 for svc in dbus elogind dhcpcd lightdm spice-vdagentd; do
