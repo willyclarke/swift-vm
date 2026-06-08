@@ -74,6 +74,7 @@ struct HelpView: View {
                     ]
                 )
 
+                #if arch(arm64)
                 helpSection(
                     icon: "cpu", color: .blue,
                     title: "Rosetta — Run x86_64 Binaries",
@@ -102,6 +103,7 @@ struct HelpView: View {
                         ("",              "`cat /proc/sys/fs/binfmt_misc/rosetta`"),
                     ]
                 )
+                #endif
 
                 helpSection(
                     icon: "keyboard", color: .gray,
@@ -120,7 +122,7 @@ struct HelpView: View {
                         ("Void Linux",    "Use the manual chroot install — `void-installer` is not included in the live ISO."),
                         ("Kernel",        "`base-system` does **not** pull in the kernel. Run `xbps-install linux` explicitly inside the chroot."),
                         ("Post-install",  "Run `postinstall/void-linux/postinstall.sh` after first boot to set up XFCE, audio, and clipboard sharing."),
-                        ("Ubuntu",        "ARM64 server ISOs available at cdimage.ubuntu.com/releases/."),
+                        ("Ubuntu",        "Server ISOs: AMD64 at releases.ubuntu.com, ARM64 at cdimage.ubuntu.com/releases."),
                     ]
                 )
             }

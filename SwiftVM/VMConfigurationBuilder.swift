@@ -45,6 +45,7 @@ enum VMConfigurationBuilder {
                 return device
             }
 
+        #if arch(arm64)
         if vmConfig.rosettaEnabled,
            case .installed = VZLinuxRosettaDirectoryShare.availability,
            let rosettaShare = try? VZLinuxRosettaDirectoryShare() {
@@ -52,6 +53,7 @@ enum VMConfigurationBuilder {
             device.share = rosettaShare
             sharingDevices.append(device)
         }
+        #endif
 
         if !sharingDevices.isEmpty {
             config.directorySharingDevices = sharingDevices
@@ -149,11 +151,19 @@ enum VMConfigurationBuilder {
     // MARK: - Rosetta
 
     static var isRosettaAvailable: Bool {
-        VZLinuxRosettaDirectoryShare.availability == .installed
+        #if arch(arm64)
+        return VZLinuxRosettaDirectoryShare.availability == .installed
+        #else
+        return false
+        #endif
     }
 
     static var isRosettaSupported: Bool {
-        VZLinuxRosettaDirectoryShare.availability != .notSupported
+        #if arch(arm64)
+        return VZLinuxRosettaDirectoryShare.availability != .notSupported
+        #else
+        return false
+        #endif
     }
 
     // MARK: - Resource options (for UI pickers)

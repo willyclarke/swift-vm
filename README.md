@@ -9,6 +9,43 @@ A macOS app that creates and runs GUI Linux virtual machines using Apple's [Virt
 - Xcode 15+
 - Apple Developer account (required for the `com.apple.security.virtualization` entitlement)
 
+## Setting up Xcode
+
+`xcodebuild` and the Virtualization framework require the **full Xcode IDE**, not just the Command Line Tools. If you see:
+
+```
+xcode-select: error: tool 'xcodebuild' requires Xcode, but active developer directory
+'/Library/Developer/CommandLineTools' is a command line tools instance
+```
+
+follow these steps:
+
+1. **Install Xcode** from the [Mac App Store](https://apps.apple.com/app/xcode/id497799835) or [developer.apple.com/xcode](https://developer.apple.com/xcode/). The App Store version is the easiest.
+
+2. **Point the developer tools at Xcode** (run once after install):
+
+   ```bash
+   sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+   ```
+
+3. **Accept the Xcode license** (required before `xcodebuild` will run):
+
+   ```bash
+   sudo xcodebuild -license accept
+   ```
+
+4. **Verify**:
+
+   ```bash
+   xcode-select -p
+   # should print: /Applications/Xcode.app/Contents/Developer
+
+   xcodebuild -version
+   # should print: Xcode 16.x …
+   ```
+
+> **Note:** `xcode-select --install` installs only the lightweight Command Line Tools (no `xcodebuild`, no Virtualization framework headers). You need the full Xcode app.
+
 ## Building and running the GUI app
 
 1. Open `SwiftVM.xcodeproj` in Xcode.
