@@ -32,6 +32,19 @@ Every target that creates a `VZVirtualMachine` must have this entitlement in its
 <true/>
 ```
 
+## Bridged Networking (Optional)
+
+The Network picker in the UI supports bridging the VM's NIC directly to a Mac interface using `VZBridgedNetworkDeviceAttachment`. This requires an additional restricted entitlement (`com.apple.vm.networking`) that must be explicitly approved by Apple — it is **not** included in `SwiftVM.entitlements` by default, so the app launches and runs normally for all developers using NAT.
+
+To enable bridged networking after receiving Apple's approval:
+
+1. In Xcode, go to the target's **Signing & Capabilities** settings
+2. Change **Code Signing Entitlements** from `SwiftVM/SwiftVM.entitlements` to `SwiftVM/SwiftVM-Bridged.entitlements`
+
+`SwiftVM-Bridged.entitlements` is checked into the repo and already contains both entitlements. Do not commit this change — keep it as a local override.
+
+To request `com.apple.vm.networking` from Apple, visit `developer.apple.com` and use the entitlement request contact form. Mention that the app uses `VZBridgedNetworkDeviceAttachment` from the Virtualization framework and that `com.apple.security.virtualization` is already approved.
+
 ## Virtualization Framework Architecture
 
 The core pipeline for any VM:

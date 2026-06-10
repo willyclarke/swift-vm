@@ -103,6 +103,21 @@ struct ContentView: View {
                     .fixedSize()
                     .disabled(manager.bundleExists)
                     .help(manager.bundleExists ? "Disk size is fixed after creation" : "Disk image size — cannot be changed after creation")
+                    Picker("Network", selection: $manager.vmConfig.bridgedInterfaceID) {
+                        Text("NAT only").tag("")
+                        if !VMConfigurationBuilder.availableBridgedInterfaces.isEmpty {
+                            Divider()
+                            ForEach(VMConfigurationBuilder.availableBridgedInterfaces, id: \.identifier) { iface in
+                                Text(iface.localizedDisplayName ?? iface.identifier).tag(iface.identifier)
+                            }
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                    .disabled(manager.isRunning || !VMConfigurationBuilder.hasBridgedNetworkingEntitlement)
+                    .help(VMConfigurationBuilder.hasBridgedNetworkingEntitlement
+                          ? "NAT only: internet via Mac. Bridged: VM gets its own IP on the selected interface."
+                          : "Bridged networking requires the com.apple.vm.networking entitlement — build with 'make build-bridged' after receiving Apple approval.")
                 }
                 .controlSize(.small)
                 .disabled(manager.isRunning)

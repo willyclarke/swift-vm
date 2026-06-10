@@ -5,29 +5,45 @@ BUILD_DIR := build
 DERIVED  := $(BUILD_DIR)/DerivedData
 APP      := $(DERIVED)/Build/Products/$(CONFIG)/SwiftVM.app
 STAGING  := $(BUILD_DIR)/.dmg-staging
+ENTITLEMENTS_DEFAULT := SwiftVM/SwiftVM.entitlements
+ENTITLEMENTS_BRIDGED := SwiftVM/SwiftVM-Bridged.entitlements
 
 VERSION  = $(shell test -f "$(APP)/Contents/Info.plist" && \
              /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" \
              "$(APP)/Contents/Info.plist" 2>/dev/null || echo "dev")
 DMG      = $(BUILD_DIR)/SwiftVM-$(VERSION).dmg
 
-.PHONY: build install dmg notarize clean help
+.PHONY: build build-bridged install dmg notarize clean help
 
 help:
 	@echo "Targets:"
-	@echo "  build     — compile Release .app into $(DERIVED)"
-	@echo "  install   — build and copy SwiftVM.app to /Applications"
-	@echo "  dmg       — build and package into a distributable DMG"
-	@echo "  notarize  — submit DMG to Apple notarization and staple ticket"
-	@echo "  clean     — remove all build artefacts"
+	@echo "  build         — compile Release .app (NAT networking, default entitlements)"
+	@echo "  build-bridged — compile Release .app with com.apple.vm.networking entitlement"
+	@echo "                  (requires Apple approval — see CLAUDE.md)"
+	@echo "  install       — build and copy SwiftVM.app to /Applications"
+	@echo "  dmg           — build and package into a distributable DMG"
+	@echo "  notarize      — submit DMG to Apple notarization and staple ticket"
+	@echo "  clean         — remove all build artefacts"
 
-## Compile a Release build.
+## Compile a Release build (NAT networking, default entitlements).
 build: _update-build-info
 	xcodebuild \
 	  -project "$(PROJECT)" \
 	  -scheme "$(SCHEME)" \
 	  -configuration "$(CONFIG)" \
 	  -derivedDataPath "$(DERIVED)" \
+	  CODE_SIGN_ENTITLEMENTS="$(ENTITLEMENTS_DEFAULT)" \
+	  build
+
+## Compile a Release build with bridged networking entitlement.
+## Requires com.apple.vm.networking approval from Apple — see CLAUDE.md.
+build-bridged: _update-build-info
+	xcodebuild \
+	  -project "$(PROJECT)" \
+	  -scheme "$(SCHEME)" \
+	  -configuration "$(CONFIG)" \
+	  -derivedDataPath "$(DERIVED)" \
+	  CODE_SIGN_ENTITLEMENTS="$(ENTITLEMENTS_BRIDGED)" \
 	  build
 
 ## Build and install to /Applications.

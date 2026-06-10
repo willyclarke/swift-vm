@@ -42,14 +42,18 @@ struct VMConfig: Codable {
 
     var diskSizeGB: Int
     var rosettaEnabled: Bool
+    /// BSD interface name to bridge (e.g. "en10"), or "" for NAT only.
+    var bridgedInterfaceID: String
 
     init(cpuCount: Int, memoryGB: Int, diskSizeGB: Int = 64,
-         rosettaEnabled: Bool = false, sharedFolders: [SharedFolder] = []) {
+         rosettaEnabled: Bool = false, sharedFolders: [SharedFolder] = [],
+         bridgedInterfaceID: String = "") {
         self.cpuCount = cpuCount
         self.memoryGB = memoryGB
         self.diskSizeGB = diskSizeGB
         self.rosettaEnabled = rosettaEnabled
         self.sharedFolders = sharedFolders
+        self.bridgedInterfaceID = bridgedInterfaceID
     }
 
     init(from decoder: Decoder) throws {
@@ -59,6 +63,7 @@ struct VMConfig: Codable {
         diskSizeGB = (try? c.decode(Int.self, forKey: .diskSizeGB)) ?? 64
         rosettaEnabled = (try? c.decode(Bool.self, forKey: .rosettaEnabled)) ?? false
         sharedFolders = (try? c.decode([SharedFolder].self, forKey: .sharedFolders)) ?? []
+        bridgedInterfaceID = (try? c.decode(String.self, forKey: .bridgedInterfaceID)) ?? ""
     }
 
     static let diskSizeOptions: [Int] = [32, 64, 128, 256, 512]
@@ -94,8 +99,9 @@ struct VMBundle {
     var diskImageURL: URL         { url.appendingPathComponent("Disk.img") }
     var nvramURL: URL             { url.appendingPathComponent("NVRAM") }
     var machineIdentifierURL: URL { url.appendingPathComponent("MachineIdentifier") }
-    var macAddressURL: URL         { url.appendingPathComponent("MACAddress") }
-    var configURL: URL             { url.appendingPathComponent("Config.json") }
+    var macAddressURL: URL               { url.appendingPathComponent("MACAddress") }
+    var bridgedMACAddressURL: URL        { url.appendingPathComponent("BridgedMACAddress") }
+    var configURL: URL                   { url.appendingPathComponent("Config.json") }
 
     func loadConfig() -> VMConfig {
         if let data = try? Data(contentsOf: configURL),

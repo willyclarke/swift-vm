@@ -1,3 +1,4 @@
+import Security
 import Virtualization
 
 enum VMConfigurationBuilder {
@@ -29,7 +30,13 @@ enum VMConfigurationBuilder {
 
         config.platform = platform
         config.bootLoader = bootloader
-        config.networkDevices = [try natNetwork(bundle: bundle)]
+        var networkDevices: [VZVirtioNetworkDeviceConfiguration] = [try natNetwork(bundle: bundle)]
+        if !vmConfig.bridgedInterfaceID.isEmpty,
+           let iface = VZBridgedNetworkInterface.networkInterfaces
+               .first(where: { $0.identifier == vmConfig.bridgedInterfaceID }) {
+            networkDevices.append(try bridgedNetwork(bundle: bundle, interface: iface))
+        }
+        config.networkDevices = networkDevices
         config.graphicsDevices = [virtioGraphics()]
         config.audioDevices = [audioInput(), audioOutput()]
         config.keyboards = [VZUSBKeyboardConfiguration()]
@@ -100,14 +107,25 @@ enum VMConfigurationBuilder {
         return device
     }
 
+    private static func bridgedNetwork(bundle: VMBundle, interface iface: VZBridgedNetworkInterface) throws -> VZVirtioNetworkDeviceConfiguration {
+        let device = VZVirtioNetworkDeviceConfiguration()
+        device.attachment = VZBridgedNetworkDeviceAttachment(interface: iface)
+        device.macAddress = try loadOrCreateMACAddress(url: bundle.bridgedMACAddressURL)
+        return device
+    }
+
     private static func loadOrCreateMACAddress(bundle: VMBundle) throws -> VZMACAddress {
-        if FileManager.default.fileExists(atPath: bundle.macAddressURL.path),
-           let saved = try? String(contentsOf: bundle.macAddressURL, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines),
+        try loadOrCreateMACAddress(url: bundle.macAddressURL)
+    }
+
+    private static func loadOrCreateMACAddress(url: URL) throws -> VZMACAddress {
+        if FileManager.default.fileExists(atPath: url.path),
+           let saved = try? String(contentsOf: url, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines),
            let mac = VZMACAddress(string: saved) {
             return mac
         }
         let mac = VZMACAddress.randomLocallyAdministered()
-        try mac.string.write(to: bundle.macAddressURL, atomically: true, encoding: .utf8)
+        try mac.string.write(to: url, atomically: true, encoding: .utf8)
         return mac
     }
 
@@ -167,6 +185,19 @@ enum VMConfigurationBuilder {
     }
 
     // MARK: - Resource options (for UI pickers)
+
+    static var availableBridgedInterfaces: [VZBridgedNetworkInterface] {
+        VZBridgedNetworkInterface.networkInterfaces
+    }
+
+    static var hasBridgedNetworkingEntitlement: Bool {
+        guard let task = SecTaskCreateFromSelf(nil),
+              let value = SecTaskCopyValueForEntitlement(
+                  task, "com.apple.vm.networking" as CFString, nil) else {
+            return false
+        }
+        return value as? Bool == true
+    }
 
     static var availableCPUCounts: [Int] {
         let maxCount = min(ProcessInfo.processInfo.processorCount,
