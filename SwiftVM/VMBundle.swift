@@ -94,8 +94,8 @@ struct VMBundle {
     var diskImageURL: URL         { url.appendingPathComponent("Disk.img") }
     var nvramURL: URL             { url.appendingPathComponent("NVRAM") }
     var machineIdentifierURL: URL { url.appendingPathComponent("MachineIdentifier") }
-    var macAddressURL: URL        { url.appendingPathComponent("MACAddress") }
-    var configURL: URL            { url.appendingPathComponent("Config.json") }
+    var macAddressURL: URL         { url.appendingPathComponent("MACAddress") }
+    var configURL: URL             { url.appendingPathComponent("Config.json") }
 
     func loadConfig() -> VMConfig {
         if let data = try? Data(contentsOf: configURL),
