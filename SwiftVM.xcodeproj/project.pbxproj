@@ -12,12 +12,12 @@
 		AA000000000000220000AABB /* VirtualMachineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000130000AABB /* VirtualMachineManager.swift */; };
 		AA000000000000230000AABB /* VMBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000140000AABB /* VMBundle.swift */; };
 		AA000000000000240000AABB /* VMConfigurationBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000150000AABB /* VMConfigurationBuilder.swift */; };
+		AA000000000000260000AABB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000170000AABB /* Assets.xcassets */; };
+		AA000000000000270000AABB /* Virtualization.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000000000001A0000AABB /* Virtualization.framework */; };
 		AA0000000000002B0000AABB /* VMWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001B0000AABB /* VMWindowController.swift */; };
 		AA0000000000002C0000AABB /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001C0000AABB /* HelpView.swift */; };
 		AA0000000000002D0000AABB /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001D0000AABB /* AboutView.swift */; };
 		AA0000000000002E0000AABB /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001E0000AABB /* BuildInfo.swift */; };
-		AA000000000000260000AABB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000170000AABB /* Assets.xcassets */; };
-		AA000000000000270000AABB /* Virtualization.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000000000001A0000AABB /* Virtualization.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,7 +66,7 @@
 				AA000000000000130000AABB /* VirtualMachineManager.swift */,
 				AA000000000000140000AABB /* VMBundle.swift */,
 				AA000000000000150000AABB /* VMConfigurationBuilder.swift */,
-					AA000000000000170000AABB /* Assets.xcassets */,
+				AA000000000000170000AABB /* Assets.xcassets */,
 				AA000000000000180000AABB /* SwiftVM.entitlements */,
 				AA000000000000190000AABB /* Info.plist */,
 				AA0000000000001B0000AABB /* VMWindowController.swift */,
@@ -158,25 +158,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXSourcesBuildPhase section */
-		AA000000000000300000AABB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AA000000000000200000AABB /* SwiftVMApp.swift in Sources */,
-				AA000000000000210000AABB /* ContentView.swift in Sources */,
-				AA000000000000220000AABB /* VirtualMachineManager.swift in Sources */,
-				AA000000000000230000AABB /* VMBundle.swift in Sources */,
-				AA000000000000240000AABB /* VMConfigurationBuilder.swift in Sources */,
-					AA0000000000002B0000AABB /* VMWindowController.swift in Sources */,
-				AA0000000000002C0000AABB /* HelpView.swift in Sources */,
-				AA0000000000002D0000AABB /* AboutView.swift in Sources */,
-				AA0000000000002E0000AABB /* BuildInfo.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXSourcesBuildPhase section */
-
 /* Begin PBXShellScriptBuildPhase section */
 		AA0000000000003F0000AABB /* Update Build Info */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -198,6 +179,25 @@
 			shellScript = "bash \"$SRCROOT/scripts/update-build-info.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA000000000000300000AABB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000000000000200000AABB /* SwiftVMApp.swift in Sources */,
+				AA000000000000210000AABB /* ContentView.swift in Sources */,
+				AA000000000000220000AABB /* VirtualMachineManager.swift in Sources */,
+				AA000000000000230000AABB /* VMBundle.swift in Sources */,
+				AA000000000000240000AABB /* VMConfigurationBuilder.swift in Sources */,
+				AA0000000000002B0000AABB /* VMWindowController.swift in Sources */,
+				AA0000000000002C0000AABB /* HelpView.swift in Sources */,
+				AA0000000000002D0000AABB /* AboutView.swift in Sources */,
+				AA0000000000002E0000AABB /* BuildInfo.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		AA000000000000600000AABB /* Debug */ = {
@@ -317,6 +317,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SwiftVM/SwiftVM.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -328,7 +329,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.SwiftVM;
+				PRODUCT_BUNDLE_IDENTIFIER = no.sb21.SwiftVM;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -341,6 +342,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SwiftVM/SwiftVM.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -352,7 +354,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.SwiftVM;
+				PRODUCT_BUNDLE_IDENTIFIER = no.sb21.SwiftVM;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -381,7 +383,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
 	rootObject = AA000000000000000000AABB /* Project object */;
 }
