@@ -122,6 +122,8 @@ struct ContentView: View {
 
             // VM settings
             VStack(alignment: .leading, spacing: 8) {
+                Text("Hardware Config")
+                    .font(.headline)
                 HStack(spacing: 8) {
                     Picker("CPU", selection: $manager.vmConfig.cpuCount) {
                         ForEach(VMConfigurationBuilder.availableCPUCounts, id: \.self) { n in
@@ -190,6 +192,8 @@ struct ContentView: View {
     @ViewBuilder
     private var sharedFoldersSection: some View {
         VStack(alignment: .leading, spacing: 6) {
+            Text("Share Config and Howto")
+                .font(.headline)
             ForEach(manager.vmConfig.sharedFolders) { folder in
                 sharedFolderRow(folder)
                     .padding(10)
@@ -233,7 +237,7 @@ struct ContentView: View {
                 .frame(width: 14)
                 .padding(.top, 1)
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 6) {
                 // Host folder path
                 HStack(spacing: 4) {
                     Text("Host folder")
@@ -259,39 +263,15 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                // mkdir sticker
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "terminal")
-                            .font(.system(size: 9, weight: .medium))
-                            .foregroundStyle(.secondary)
-                        Text("Create mount point first:")
-                            .font(.system(.caption2))
-                            .foregroundStyle(.secondary)
-                    }
-                    HStack(spacing: 4) {
-                        Text(mkdirEntry(for: folder))
-                            .font(.system(.caption2, design: .monospaced))
-                            .foregroundStyle(.primary)
-                            .textSelection(.enabled)
-                        inlineCopyButton(mkdirEntry(for: folder), tint: .secondary)
-                    }
-                }
-                .padding(.horizontal, 6)
-                .padding(.vertical, 4)
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 5))
-
-                // fstab automount hint
-                commandHint(
-                    label: "Automount entry in /etc/fstab:",
-                    command: fstabEntry(for: folder)
-                )
-
-                // Temporary mount hint
-                commandHint(
-                    label: "Temporary mount:",
-                    command: mountEntry(for: folder)
-                )
+                commandCard(icon: "terminal",
+                            label: "Create mount point first:",
+                            command: mkdirEntry(for: folder))
+                commandCard(icon: "doc.text",
+                            label: "Automount entry in /etc/fstab:",
+                            command: fstabEntry(for: folder))
+                commandCard(icon: "terminal",
+                            label: "Temporary mount:",
+                            command: mountEntry(for: folder))
             }
 
             Spacer()
@@ -334,24 +314,30 @@ struct ContentView: View {
         .controlSize(.small)
     }
 
-    private func commandHint(label: String, command: String) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
+    private func commandCard(icon: String, label: String, command: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
-                Image(systemName: "link")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.primary)
+                Image(systemName: icon)
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(.secondary)
                 Text(label)
                     .font(.system(.caption2))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.secondary)
             }
-            HStack(spacing: 4) {
-                Text(command)
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                TextField("", text: .constant(command))
+                    .textFieldStyle(.plain)
                     .font(.system(.caption2, design: .monospaced))
-                    .foregroundStyle(.orange)
-                    .textSelection(.enabled)
-                inlineCopyButton(command)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .focusEffectDisabled()
+                CopyButton(text: command, tint: .secondary)
             }
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
     }
 }
 
