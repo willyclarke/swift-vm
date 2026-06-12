@@ -1,4 +1,4 @@
 // Auto-generated — do not edit. Run scripts/update-build-info.sh to refresh.
 enum BuildInfo {
-    static let gitHash = "7cc95f1"
+    static let gitHash = "3b486ae"
 }

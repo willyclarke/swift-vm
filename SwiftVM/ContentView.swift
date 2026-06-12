@@ -29,7 +29,7 @@ struct ContentView: View {
                 ProgressView("Starting virtual machine…")
             } else {
                 VStack(spacing: 12) {
-                    Button(manager.bundleExists ? "Start Virtual Machine" : "Install Linux…") {
+                    Button(manager.bundleExists ? "Start Virtual Machine" : "Install VM…") {
                         manager.start()
                     }
                     .buttonStyle(.borderedProminent)
@@ -62,23 +62,66 @@ struct ContentView: View {
     }
 
     private var bundleSelector: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "externaldrive")
-                .font(.title2)
-                .foregroundStyle(.secondary)
-                .frame(width: 28)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(manager.bundle.displayName)
-                    .font(.headline)
-                Text(manager.bundle.abbreviatedPath)
-                    .font(.caption)
+        VStack(alignment: .leading, spacing: 8) {
+            // Name & location
+            HStack(spacing: 12) {
+                Image(systemName: "externaldrive")
+                    .font(.title2)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                Divider()
-                sharedFoldersSection
+                    .frame(width: 28)
 
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(manager.bundle.displayName)
+                        .font(.headline)
+                    Text(manager.bundle.abbreviatedPath)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+
+                Spacer()
+
+                HStack(spacing: 6) {
+                    Button {
+                        manager.selectBundle()
+                    } label: {
+                        Label("Select VM…", systemImage: "folder")
+                    }
+                    .help("Open an existing VM bundle")
+                    .disabled(manager.isRunning)
+
+                    Button {
+                        manager.moveBundle()
+                    } label: {
+                        Label("Move VM…", systemImage: "arrow.forward")
+                    }
+                    .help("Move the VM bundle to a new location")
+                    .disabled(manager.isRunning || !manager.bundleExists)
+
+                    Button {
+                        manager.newVM()
+                    } label: {
+                        Label("New VM", systemImage: "plus.circle.fill")
+                    }
+                    .help("Create a new VM bundle")
+                    .disabled(manager.isRunning)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+
+            // Shared folders
+            sharedFoldersSection
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+
+            // VM settings
+            VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
                     Picker("CPU", selection: $manager.vmConfig.cpuCount) {
                         ForEach(VMConfigurationBuilder.availableCPUCounts, id: \.self) { n in
@@ -135,40 +178,13 @@ struct ContentView: View {
                           : "Rosetta is not installed — run 'softwareupdate --install-rosetta' in Terminal")
                 }
             }
-
-            Spacer()
-
-            HStack(spacing: 6) {
-                Button {
-                    manager.selectBundle()
-                } label: {
-                    Label("Select VM…", systemImage: "folder")
-                }
-                .help("Open an existing VM bundle")
-                .disabled(manager.isRunning)
-
-                Button {
-                    manager.moveBundle()
-                } label: {
-                    Label("Move VM…", systemImage: "arrow.forward")
-                }
-                .help("Move the VM bundle to a new location")
-                .disabled(manager.isRunning || !manager.bundleExists)
-
-                Button {
-                    manager.newVM()
-                } label: {
-                    Label("New VM", systemImage: "plus.circle.fill")
-                }
-                .help("Create a new VM bundle")
-                .disabled(manager.isRunning)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
         }
         .padding(12)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
     }
 
     @ViewBuilder
