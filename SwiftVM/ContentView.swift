@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var manager = VirtualMachineManager()
+    @ObservedObject var manager: VirtualMachineManager
     @State private var confirmDelete = false
+    @AppStorage("sharedFoldersExpanded") private var sharedFoldersExpanded = true
 
     var body: some View {
         launchView
@@ -191,25 +192,41 @@ struct ContentView: View {
 
     @ViewBuilder
     private var sharedFoldersSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Share Config and Howto")
-                .font(.headline)
-            ForEach(manager.vmConfig.sharedFolders) { folder in
-                sharedFolderRow(folder)
-                    .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.windowBackgroundColor), in: RoundedRectangle(cornerRadius: 6))
-                    .shadow(color: .black.opacity(0.06), radius: 2, x: 0, y: 1)
+        DisclosureGroup(isExpanded: $sharedFoldersExpanded) {
+            VStack(alignment: .leading, spacing: 6) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(manager.vmConfig.sharedFolders) { folder in
+                            sharedFolderRow(folder)
+                                .padding(10)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(.windowBackgroundColor), in: RoundedRectangle(cornerRadius: 6))
+                                .shadow(color: .black.opacity(0.06), radius: 2, x: 0, y: 1)
+                        }
+                    }
+                }
+                .frame(maxHeight: 400)
+                Button {
+                    manager.addSharedFolder()
+                } label: {
+                    Label(manager.vmConfig.sharedFolders.isEmpty ? "Add Shared Folder…" : "Add Share",
+                          systemImage: "plus")
+                        .font(.caption)
+                }
+                .buttonStyle(.borderless)
+                .disabled(manager.isRunning)
             }
-            Button {
-                manager.addSharedFolder()
-            } label: {
-                Label(manager.vmConfig.sharedFolders.isEmpty ? "Add Shared Folder…" : "Add Share",
-                      systemImage: "plus")
-                    .font(.caption)
+            .padding(.top, 6)
+        } label: {
+            HStack(spacing: 6) {
+                Text("Share Config and Howto")
+                    .font(.headline)
+                if !manager.vmConfig.sharedFolders.isEmpty {
+                    Text("(\(manager.vmConfig.sharedFolders.count))")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
             }
-            .buttonStyle(.borderless)
-            .disabled(manager.isRunning)
         }
     }
 

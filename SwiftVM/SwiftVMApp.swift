@@ -2,9 +2,11 @@ import SwiftUI
 
 @main
 struct SwiftVMApp: App {
+    @StateObject private var manager = VirtualMachineManager()
+
     var body: some Scene {
         WindowGroup("Swift VM") {
-            ContentView()
+            ContentView(manager: manager)
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified(showsTitle: true))
@@ -12,6 +14,7 @@ struct SwiftVMApp: App {
         .commands {
             HelpCommands()
             AboutCommands()
+            RunCommands(manager: manager)
         }
 
         Window("SwiftVM Help", id: "help") {
@@ -35,6 +38,20 @@ struct AboutCommands: Commands {
             Button("About SwiftVM") {
                 openWindow(id: "about")
             }
+        }
+    }
+}
+
+struct RunCommands: Commands {
+    @ObservedObject var manager: VirtualMachineManager
+
+    var body: some Commands {
+        CommandMenu("Run") {
+            Button(manager.bundleExists ? "Start Virtual Machine" : "Install VM…") {
+                manager.start()
+            }
+            .keyboardShortcut("r", modifiers: .command)
+            .disabled(manager.isRunning || manager.isStarting)
         }
     }
 }
