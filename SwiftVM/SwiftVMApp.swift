@@ -27,6 +27,10 @@ struct SwiftVMApp: App {
             AboutView()
         }
         .windowResizability(.contentSize)
+
+        Settings {
+            SettingsView()
+        }
     }
 }
 

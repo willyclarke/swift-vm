@@ -8,6 +8,7 @@ struct ContentView: View {
     var body: some View {
         launchView
             .frame(minWidth: 400, minHeight: 300)
+            .background(BackgroundView())
             .alert("VM Error", isPresented: $manager.hasError) {
                 Button("OK") { }
             } message: {
@@ -380,5 +381,30 @@ private struct CopyButton: View {
         }
         .buttonStyle(.borderless)
         .help(copied ? "Copied!" : "Copy to clipboard")
+    }
+}
+
+private struct BackgroundView: View {
+    @AppStorage("backgroundImagePath") private var backgroundImagePath: String = ""
+    @AppStorage("backgroundBlurRadius") private var backgroundBlurRadius: Double = 3
+
+    var body: some View {
+        ZStack {
+            if !backgroundImagePath.isEmpty, let nsImage = NSImage(contentsOfFile: backgroundImagePath) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .opacity(0.25)
+                    .blur(radius: backgroundBlurRadius)
+                    .clipped()
+            } else {
+                LinearGradient(
+                    colors: [Color.accentColor.opacity(0.12), Color(.windowBackgroundColor)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+        }
+        .ignoresSafeArea()
     }
 }
