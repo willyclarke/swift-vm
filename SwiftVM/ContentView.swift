@@ -189,9 +189,13 @@ struct ContentView: View {
 
     @ViewBuilder
     private var sharedFoldersSection: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: 6) {
             ForEach(manager.vmConfig.sharedFolders) { folder in
                 sharedFolderRow(folder)
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.windowBackgroundColor), in: RoundedRectangle(cornerRadius: 6))
+                    .shadow(color: .black.opacity(0.06), radius: 2, x: 0, y: 1)
             }
             Button {
                 manager.addSharedFolder()
