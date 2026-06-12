@@ -218,16 +218,7 @@ struct ContentView: View {
     }
 
     private func inlineCopyButton(_ text: String, tint: Color = .orange) -> some View {
-        Button {
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(text, forType: .string)
-        } label: {
-            Image(systemName: "doc.on.doc")
-                .font(.system(size: 9))
-                .foregroundStyle(tint)
-        }
-        .buttonStyle(.borderless)
-        .help("Copy to clipboard")
+        CopyButton(text: text, tint: tint)
     }
 
     private func sharedFolderRow(_ folder: SharedFolder) -> some View {
@@ -357,5 +348,30 @@ struct ContentView: View {
                 inlineCopyButton(command)
             }
         }
+    }
+}
+
+private struct CopyButton: View {
+    let text: String
+    var tint: Color = .orange
+    @State private var copied = false
+
+    var body: some View {
+        Button {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(text, forType: .string)
+            withAnimation { copied = true }
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                withAnimation { copied = false }
+            }
+        } label: {
+            Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                .font(.system(size: 9))
+                .foregroundStyle(copied ? .green : tint)
+                .contentTransition(.symbolEffect(.replace.offUp))
+        }
+        .buttonStyle(.borderless)
+        .help(copied ? "Copied!" : "Copy to clipboard")
     }
 }
