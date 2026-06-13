@@ -39,6 +39,19 @@ struct HelpView: View {
                 )
 
                 helpSection(
+                    icon: "gauge.with.dots.needle.67percent", color: .pink,
+                    title: "Performance",
+                    rows: [
+                        ("Entropy",       "A virtio entropy device is always attached, giving the guest fast hardware randomness — speeds up first-boot crypto (e.g. SSH host key generation)."),
+                        ("Disk Sync",     "Controls how the virtual disk flushes writes to the host:"),
+                        ("Automatic",     "Full sync on every flush. Safest — survives host crashes and power loss without corruption."),
+                        ("Fsync",         "Lighter-weight sync. Noticeably faster for builds and package installs; tiny risk of data loss if the host crashes mid-write."),
+                        ("None",          "No disk sync at all. Fastest, but a host crash or force-quit can corrupt the VM's disk image — use only for disposable/test VMs."),
+                        ("!",             "Disk Sync changes apply on next boot. If SwiftVM feels slower than other virtualization apps for disk-heavy work (compiling, package installs), try **Fsync**."),
+                    ]
+                )
+
+                helpSection(
                     icon: "terminal.fill", color: .green,
                     title: "Headless / SSH Mode",
                     rows: [
@@ -110,6 +123,7 @@ struct HelpView: View {
                     title: "Shortcuts",
                     rows: [
                         ("⌘ ↩",          "Start or install the current VM."),
+                        ("⌘ R",          "Start or install the current VM (Run menu)."),
                         ("⌘ ?",          "Open this help window."),
                         ("Ctrl+C",        "Stop the VM (CLI / headless mode)."),
                     ]

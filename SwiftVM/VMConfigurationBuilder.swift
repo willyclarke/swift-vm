@@ -18,13 +18,13 @@ enum VMConfigurationBuilder {
             bootloader.variableStore = try VZEFIVariableStore(creatingVariableStoreAt: bundle.nvramURL)
             config.storageDevices = [
                 try usbMassStorage(isoURL: isoURL),
-                try mainDisk(url: bundle.diskImageURL),
+                try mainDisk(url: bundle.diskImageURL, syncMode: vmConfig.diskSyncMode),
             ]
         } else {
             platform.machineIdentifier = try loadMachineIdentifier(from: bundle.machineIdentifierURL)
             bootloader.variableStore = VZEFIVariableStore(url: bundle.nvramURL)
             config.storageDevices = [
-                try mainDisk(url: bundle.diskImageURL),
+                try mainDisk(url: bundle.diskImageURL, syncMode: vmConfig.diskSyncMode),
             ]
         }
 
@@ -42,6 +42,7 @@ enum VMConfigurationBuilder {
         config.keyboards = [VZUSBKeyboardConfiguration()]
         config.pointingDevices = [VZUSBScreenCoordinatePointingDeviceConfiguration()]
         config.consoleDevices = [spiceAgentConsole()]
+        config.entropyDevices = [VZVirtioEntropyDeviceConfiguration()]
 
         var sharingDevices: [VZVirtioFileSystemDeviceConfiguration] =
             vmConfig.sharedFolders.map { folder in
@@ -88,8 +89,9 @@ enum VMConfigurationBuilder {
 
     // MARK: - Storage
 
-    private static func mainDisk(url: URL) throws -> VZVirtioBlockDeviceConfiguration {
-        let attachment = try VZDiskImageStorageDeviceAttachment(url: url, readOnly: false)
+    private static func mainDisk(url: URL, syncMode: DiskSyncMode) throws -> VZVirtioBlockDeviceConfiguration {
+        let attachment = try VZDiskImageStorageDeviceAttachment(
+            url: url, readOnly: false, cachingMode: .automatic, synchronizationMode: syncMode.attachmentMode)
         return VZVirtioBlockDeviceConfiguration(attachment: attachment)
     }
 

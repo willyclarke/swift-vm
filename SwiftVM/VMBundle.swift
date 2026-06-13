@@ -1,4 +1,5 @@
 import Foundation
+import Virtualization
 
 struct SharedFolder: Codable, Identifiable {
     var id: UUID
@@ -35,6 +36,36 @@ struct SharedFolder: Codable, Identifiable {
     }
 }
 
+enum DiskSyncMode: String, Codable, CaseIterable {
+    case automatic
+    case fsync
+    case none
+
+    var attachmentMode: VZDiskImageSynchronizationMode {
+        switch self {
+        case .automatic: return .full
+        case .fsync: return .fsync
+        case .none: return .none
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .automatic: return "Automatic (safest)"
+        case .fsync: return "Fsync (faster)"
+        case .none: return "None (fastest, risk of corruption)"
+        }
+    }
+
+    var help: String {
+        switch self {
+        case .automatic: return "Flushes the host disk cache on every write — safest, but slowest for disk-heavy workloads."
+        case .fsync: return "Uses a lighter-weight sync — noticeably faster for builds and package installs, small risk of data loss on host crash/power loss."
+        case .none: return "No disk synchronization — fastest, but a host crash or force-quit can corrupt the VM's disk image."
+        }
+    }
+}
+
 struct VMConfig: Codable {
     var cpuCount: Int
     var memoryGB: Int
@@ -44,16 +75,18 @@ struct VMConfig: Codable {
     var rosettaEnabled: Bool
     /// BSD interface name to bridge (e.g. "en10"), or "" for NAT only.
     var bridgedInterfaceID: String
+    var diskSyncMode: DiskSyncMode
 
     init(cpuCount: Int, memoryGB: Int, diskSizeGB: Int = 64,
          rosettaEnabled: Bool = false, sharedFolders: [SharedFolder] = [],
-         bridgedInterfaceID: String = "") {
+         bridgedInterfaceID: String = "", diskSyncMode: DiskSyncMode = .automatic) {
         self.cpuCount = cpuCount
         self.memoryGB = memoryGB
         self.diskSizeGB = diskSizeGB
         self.rosettaEnabled = rosettaEnabled
         self.sharedFolders = sharedFolders
         self.bridgedInterfaceID = bridgedInterfaceID
+        self.diskSyncMode = diskSyncMode
     }
 
     init(from decoder: Decoder) throws {
@@ -64,6 +97,7 @@ struct VMConfig: Codable {
         rosettaEnabled = (try? c.decode(Bool.self, forKey: .rosettaEnabled)) ?? false
         sharedFolders = (try? c.decode([SharedFolder].self, forKey: .sharedFolders)) ?? []
         bridgedInterfaceID = (try? c.decode(String.self, forKey: .bridgedInterfaceID)) ?? ""
+        diskSyncMode = (try? c.decode(DiskSyncMode.self, forKey: .diskSyncMode)) ?? .automatic
     }
 
     static let diskSizeOptions: [Int] = [32, 64, 128, 256, 512]

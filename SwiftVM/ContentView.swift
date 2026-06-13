@@ -165,6 +165,14 @@ struct ContentView: View {
                     .help(VMConfigurationBuilder.hasBridgedNetworkingEntitlement
                           ? "NAT only: internet via Mac. Bridged: VM gets its own IP on the selected interface."
                           : "Bridged networking requires the com.apple.vm.networking entitlement — build with 'make build-bridged' after receiving Apple approval.")
+                    Picker("Disk Sync", selection: $manager.vmConfig.diskSyncMode) {
+                        ForEach(DiskSyncMode.allCases, id: \.self) { mode in
+                            Text(mode.label).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .fixedSize()
+                    .help(manager.vmConfig.diskSyncMode.help)
                 }
                 .controlSize(.small)
                 .disabled(manager.isRunning)
@@ -343,12 +351,11 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
             }
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                TextField("", text: .constant(command))
-                    .textFieldStyle(.plain)
+                Text(command)
                     .font(.system(.caption2, design: .monospaced))
                     .foregroundStyle(.primary)
+                    .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .focusEffectDisabled()
                 CopyButton(text: command, tint: .secondary)
             }
         }
