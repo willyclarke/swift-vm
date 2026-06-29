@@ -100,7 +100,7 @@ struct VMConfig: Codable {
         diskSyncMode = (try? c.decode(DiskSyncMode.self, forKey: .diskSyncMode)) ?? .automatic
     }
 
-    static let diskSizeOptions: [Int] = [32, 64, 128, 256, 512]
+    static let diskSizeOptions: [Int] = [4, 8, 16, 32, 64, 128, 256, 512]
 }
 
 struct VMBundle {
