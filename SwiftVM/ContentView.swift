@@ -1,13 +1,14 @@
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var manager: VirtualMachineManager
+    @StateObject private var manager = VirtualMachineManager()
     @State private var confirmDelete = false
     @AppStorage("sharedFoldersExpanded") private var sharedFoldersExpanded = true
 
     var body: some View {
         launchView
             .frame(minWidth: 400, minHeight: 300)
+            .focusedObject(manager)
             .background(BackgroundView())
             .alert("VM Error", isPresented: $manager.hasError) {
                 Button("OK") { }
