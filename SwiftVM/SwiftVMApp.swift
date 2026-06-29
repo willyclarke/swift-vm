@@ -15,11 +15,11 @@ struct SwiftVMApp: App {
             RunCommands()
         }
 
-        Window("SwiftVM Help", id: "help") {
+        Window("SwiftVM Howto", id: "help") {
             HelpView()
         }
         .windowResizability(.contentSize)
-        .defaultSize(width: 600, height: 680)
+        .defaultSize(width: 820, height: 600)
 
         Window("About SwiftVM", id: "about") {
             AboutView()

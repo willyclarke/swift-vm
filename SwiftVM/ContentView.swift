@@ -367,7 +367,7 @@ struct ContentView: View {
     }
 }
 
-private struct CopyButton: View {
+struct CopyButton: View {
     let text: String
     var tint: Color = .orange
     @State private var copied = false
