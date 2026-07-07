@@ -189,6 +189,44 @@ struct ContentView: View {
                           ? "Expose Rosetta to the ARM64 guest so it can run x86_64 binaries"
                           : "Rosetta is not installed — run 'softwareupdate --install-rosetta' in Terminal")
                 }
+
+                Toggle(isOn: $manager.vmConfig.profinetEnabled) {
+                    Label("PROFINET L2 link (eth1)", systemImage: "cable.connector")
+                        .font(.caption)
+                }
+                .toggleStyle(.checkbox)
+                .controlSize(.small)
+                .disabled(manager.isRunning)
+                .help("Add a second virtio NIC on a shared, isolated layer-2 segment for raw-Ethernet guest↔guest traffic (e.g. PROFINET RT). VMs must run as windows in the same app process (⌘N) to reach each other.")
+                .onChange(of: manager.vmConfig.profinetEnabled) { enabled in
+                    // Seed a valid default MAC on enable so eth1 actually appears — an empty
+                    // field is only a placeholder and would silently skip the NIC. Edit it to
+                    // keep each VM's eth1 MAC distinct (see the Howto for per-VM values).
+                    if enabled && manager.vmConfig.profinetMAC.isEmpty {
+                        manager.vmConfig.profinetMAC = "02:50:00:00:22:01"
+                    }
+                }
+
+                if manager.vmConfig.profinetEnabled {
+                    HStack(spacing: 6) {
+                        Text("eth1 MAC")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        TextField("02:50:00:00:22:01", text: $manager.vmConfig.profinetMAC)
+                            .textFieldStyle(.roundedBorder)
+                            .font(.system(.caption, design: .monospaced))
+                            .frame(width: 170)
+                            .disabled(manager.isRunning)
+                        if !manager.vmConfig.profinetMAC.isEmpty && !isValidMAC(manager.vmConfig.profinetMAC) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                                .help("Not a valid MAC address — the second NIC will be skipped.")
+                        }
+                    }
+                    .padding(.leading, 18)
+                    .help("Fixed, locally-administered unicast MAC for eth1. Must be distinct per VM and stable across boots so the guest can pin a static IP.")
+                }
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -257,6 +295,14 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+        }
+    }
+
+    private func isValidMAC(_ string: String) -> Bool {
+        let parts = string.split(separator: ":", omittingEmptySubsequences: false)
+        guard parts.count == 6 else { return false }
+        return parts.allSatisfy { part in
+            part.count == 2 && part.allSatisfy(\.isHexDigit)
         }
     }
 

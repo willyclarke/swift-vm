@@ -12,6 +12,7 @@
 		AA000000000000220000AABB /* VirtualMachineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000130000AABB /* VirtualMachineManager.swift */; };
 		AA000000000000230000AABB /* VMBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000140000AABB /* VMBundle.swift */; };
 		AA000000000000240000AABB /* VMConfigurationBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000150000AABB /* VMConfigurationBuilder.swift */; };
+		AA000000000000250000AABB /* ProfinetSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000160000AABB /* ProfinetSwitch.swift */; };
 		AA000000000000260000AABB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000170000AABB /* Assets.xcassets */; };
 		AA000000000000270000AABB /* Virtualization.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000000000001A0000AABB /* Virtualization.framework */; };
 		AA0000000000002B0000AABB /* VMWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000001B0000AABB /* VMWindowController.swift */; };
@@ -28,6 +29,7 @@
 		AA000000000000130000AABB /* VirtualMachineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualMachineManager.swift; sourceTree = "<group>"; };
 		AA000000000000140000AABB /* VMBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VMBundle.swift; sourceTree = "<group>"; };
 		AA000000000000150000AABB /* VMConfigurationBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VMConfigurationBuilder.swift; sourceTree = "<group>"; };
+		AA000000000000160000AABB /* ProfinetSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfinetSwitch.swift; sourceTree = "<group>"; };
 		AA000000000000170000AABB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA000000000000180000AABB /* SwiftVM.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftVM.entitlements; sourceTree = "<group>"; };
 		AA000000000000190000AABB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -68,6 +70,7 @@
 				AA000000000000130000AABB /* VirtualMachineManager.swift */,
 				AA000000000000140000AABB /* VMBundle.swift */,
 				AA000000000000150000AABB /* VMConfigurationBuilder.swift */,
+				AA000000000000160000AABB /* ProfinetSwitch.swift */,
 				AA000000000000170000AABB /* Assets.xcassets */,
 				AA000000000000180000AABB /* SwiftVM.entitlements */,
 				AA000000000000190000AABB /* Info.plist */,
@@ -193,6 +196,7 @@
 				AA000000000000220000AABB /* VirtualMachineManager.swift in Sources */,
 				AA000000000000230000AABB /* VMBundle.swift in Sources */,
 				AA000000000000240000AABB /* VMConfigurationBuilder.swift in Sources */,
+				AA000000000000250000AABB /* ProfinetSwitch.swift in Sources */,
 				AA0000000000002B0000AABB /* VMWindowController.swift in Sources */,
 				AA0000000000002C0000AABB /* HelpView.swift in Sources */,
 				AA0000000000002D0000AABB /* AboutView.swift in Sources */,

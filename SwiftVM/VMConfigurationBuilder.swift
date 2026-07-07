@@ -36,6 +36,11 @@ enum VMConfigurationBuilder {
                .first(where: { $0.identifier == vmConfig.bridgedInterfaceID }) {
             networkDevices.append(try bridgedNetwork(bundle: bundle, interface: iface))
         }
+        // Opt-in second NIC (eth1) on the shared PROFINET L2 segment. Appended last so it
+        // enumerates after the NAT NIC in the guest. The existing NAT NIC is untouched.
+        if let profinet = profinetNetwork(vmConfig: vmConfig) {
+            networkDevices.append(profinet)
+        }
         config.networkDevices = networkDevices
         config.graphicsDevices = [virtioGraphics()]
         config.audioDevices = [audioInput(), audioOutput()]
@@ -113,6 +118,25 @@ enum VMConfigurationBuilder {
         let device = VZVirtioNetworkDeviceConfiguration()
         device.attachment = VZBridgedNetworkDeviceAttachment(interface: iface)
         device.macAddress = try loadOrCreateMACAddress(url: bundle.bridgedMACAddressURL)
+        return device
+    }
+
+    /// Build the opt-in PROFINET NIC (eth1), attached to the in-process `ProfinetSwitch`
+    /// hub via `VZFileHandleNetworkDeviceAttachment`. Returns `nil` when disabled or when
+    /// the configured MAC is missing/invalid, in which case no second NIC is added.
+    private static func profinetNetwork(vmConfig: VMConfig) -> VZVirtioNetworkDeviceConfiguration? {
+        guard vmConfig.profinetEnabled else { return nil }
+        guard let mac = VZMACAddress(string: vmConfig.profinetMAC.trimmingCharacters(in: .whitespaces)) else {
+            fputs("PROFINET NIC skipped: invalid MAC \"\(vmConfig.profinetMAC)\"\n", stderr)
+            return nil
+        }
+        guard let fileHandle = ProfinetSwitch.shared.makeAttachmentFileHandle(macString: mac.string) else {
+            fputs("PROFINET NIC skipped: could not create hub socket\n", stderr)
+            return nil
+        }
+        let device = VZVirtioNetworkDeviceConfiguration()
+        device.attachment = VZFileHandleNetworkDeviceAttachment(fileHandle: fileHandle)
+        device.macAddress = mac
         return device
     }
 

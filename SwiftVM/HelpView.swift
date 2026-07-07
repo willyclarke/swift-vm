@@ -210,6 +210,26 @@ struct HelpView: View {
                 ]
             ),
             HelpTopic(
+                icon: "cable.connector", color: .red,
+                title: "PROFINET L2 Link (eth1)",
+                rows: [
+                    ("Purpose",       "Apple NAT isolates guests from each other, so raw Ethernet — PROFINET RT (EtherType 0x8892) and DCP — can't cross between VMs. Enabling this adds a second NIC (`eth1`) on a shared, isolated layer-2 segment. No `com.apple.vm.networking` entitlement and no root helper are needed."),
+                    ("Enable",        "Tick **PROFINET L2 link (eth1)** in Hardware Config on each VM, give each a distinct MAC, then start (or restart) the VM. The NIC is appended after the NAT NIC, so management/SSH stays on `eth0` and the new link is `eth1`."),
+                    ("!",             "Both VMs must run as windows in the **same app process** — open the second VM with **File ▸ New Window (⌘N)**. The hub is in-process only: separate app launches and the headless CLI runner won't share the segment."),
+                    ("Example MACs",  "Use fixed, locally-administered, distinct MACs. gwdev eth1 = `02:50:00:00:22:01`, stat171 eth1 = `02:50:00:00:22:71`. Extra devices (stat173/stat174) just pick their own MAC and join the same segment automatically."),
+                    ("gwdev eth1",    "Assign a static IP (no gateway) inside the guest:"),
+                    ("",              "`sudo ip addr add 172.16.22.1/24 dev eth1 && sudo ip link set eth1 up`"),
+                    ("stat171 eth1",  "And on the device VM:"),
+                    ("",              "`sudo ip addr add 172.16.22.171/24 dev eth1 && sudo ip link set eth1 up`"),
+                    ("Verify NIC",    "Confirm `eth1` exists with the MAC you configured:"),
+                    ("",              "`ip link show eth1`"),
+                    ("Verify L2",     "Sniff `eth1` on one VM, then generate traffic from the other:"),
+                    ("",              "`sudo tcpdump -i eth1 -e`"),
+                    ("",              "`ping -c3 172.16.22.171`"),
+                    ("How it works",  "Each `eth1` is a `VZFileHandleNetworkDeviceAttachment` over a `socketpair(AF_UNIX, SOCK_DGRAM)` where one datagram equals one Ethernet frame. An in-process hub reads frames from every VM and floods them to the others; socket buffers are enlarged to ~4 MB to avoid dropping bursty RT traffic."),
+                ]
+            ),
+            HelpTopic(
                 icon: "terminal.fill", color: .green,
                 title: "Headless / SSH Mode",
                 rows: [

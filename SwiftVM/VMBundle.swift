@@ -77,9 +77,18 @@ struct VMConfig: Codable {
     var bridgedInterfaceID: String
     var diskSyncMode: DiskSyncMode
 
+    /// Opt-in second NIC (eth1) on a shared isolated layer-2 segment, backed by
+    /// `VZFileHandleNetworkDeviceAttachment` + the in-process `ProfinetSwitch` hub.
+    /// Used for raw-Ethernet guest↔guest traffic (e.g. PROFINET RT) that Apple NAT blocks.
+    var profinetEnabled: Bool
+    /// Fixed, locally-administered unicast MAC for eth1 (e.g. "02:50:00:00:22:01").
+    /// Must be distinct per VM and stable across boots so guests can pin static IPs.
+    var profinetMAC: String
+
     init(cpuCount: Int, memoryGB: Int, diskSizeGB: Int = 64,
          rosettaEnabled: Bool = false, sharedFolders: [SharedFolder] = [],
-         bridgedInterfaceID: String = "", diskSyncMode: DiskSyncMode = .automatic) {
+         bridgedInterfaceID: String = "", diskSyncMode: DiskSyncMode = .automatic,
+         profinetEnabled: Bool = false, profinetMAC: String = "") {
         self.cpuCount = cpuCount
         self.memoryGB = memoryGB
         self.diskSizeGB = diskSizeGB
@@ -87,6 +96,8 @@ struct VMConfig: Codable {
         self.sharedFolders = sharedFolders
         self.bridgedInterfaceID = bridgedInterfaceID
         self.diskSyncMode = diskSyncMode
+        self.profinetEnabled = profinetEnabled
+        self.profinetMAC = profinetMAC
     }
 
     init(from decoder: Decoder) throws {
@@ -98,6 +109,8 @@ struct VMConfig: Codable {
         sharedFolders = (try? c.decode([SharedFolder].self, forKey: .sharedFolders)) ?? []
         bridgedInterfaceID = (try? c.decode(String.self, forKey: .bridgedInterfaceID)) ?? ""
         diskSyncMode = (try? c.decode(DiskSyncMode.self, forKey: .diskSyncMode)) ?? .automatic
+        profinetEnabled = (try? c.decode(Bool.self, forKey: .profinetEnabled)) ?? false
+        profinetMAC = (try? c.decode(String.self, forKey: .profinetMAC)) ?? ""
     }
 
     static let diskSizeOptions: [Int] = [4, 8, 16, 32, 64, 128, 256, 512]
