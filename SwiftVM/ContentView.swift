@@ -85,32 +85,31 @@ struct ContentView: View {
 
                 Spacer()
 
-                HStack(spacing: 6) {
-                    Button {
+                HStack(spacing: 8) {
+                    bundleActionButton("Select VM…", systemImage: "folder.fill", tint: .blue,
+                                       help: "Open an existing VM bundle") {
                         manager.selectBundle()
-                    } label: {
-                        Label("Select VM…", systemImage: "folder")
                     }
-                    .help("Open an existing VM bundle")
                     .disabled(manager.isRunning)
 
-                    Button {
+                    bundleActionButton("Move VM…", systemImage: "arrow.up.forward.square.fill", tint: .teal,
+                                       help: "Move the VM bundle to a new location") {
                         manager.moveBundle()
-                    } label: {
-                        Label("Move VM…", systemImage: "arrow.forward")
                     }
-                    .help("Move the VM bundle to a new location")
                     .disabled(manager.isRunning || !manager.bundleExists)
 
-                    Button {
-                        manager.newVM()
-                    } label: {
-                        Label("New VM", systemImage: "plus.circle.fill")
+                    bundleActionButton("Clone VM…", systemImage: "doc.on.doc.fill", tint: .purple,
+                                       help: "Duplicate this VM with a fresh machine ID and MAC address") {
+                        manager.cloneBundle()
                     }
-                    .help("Create a new VM bundle")
+                    .disabled(manager.isRunning || !manager.bundleExists)
+
+                    bundleActionButton("New VM", systemImage: "plus.circle.fill", tint: .green,
+                                       help: "Create a new VM bundle", prominent: true) {
+                        manager.newVM()
+                    }
                     .disabled(manager.isRunning)
                 }
-                .buttonStyle(.bordered)
                 .controlSize(.small)
             }
             .padding(12)
@@ -198,6 +197,27 @@ struct ContentView: View {
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    @ViewBuilder
+    private func bundleActionButton(_ title: String, systemImage: String, tint: Color,
+                                    help: String, prominent: Bool = false,
+                                    action: @escaping () -> Void) -> some View {
+        if prominent {
+            Button(action: action) {
+                Label(title, systemImage: systemImage)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(tint)
+            .help(help)
+        } else {
+            Button(action: action) {
+                Label(title, systemImage: systemImage)
+            }
+            .buttonStyle(.bordered)
+            .tint(tint)
+            .help(help)
+        }
     }
 
     @ViewBuilder

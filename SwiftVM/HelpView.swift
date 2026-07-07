@@ -167,6 +167,28 @@ struct HelpView: View {
                 ]
             ),
             HelpTopic(
+                icon: "doc.on.doc.fill", color: .mint,
+                title: "Cloning a VM",
+                rows: [
+                    ("Clone…",         "Click **Clone VM…** in the VM card to duplicate the current bundle, then choose a name and location for the copy."),
+                    ("What's copied",  "The disk image (`Disk.img`), EFI variable store (`NVRAM`) and settings (`Config.json`) are duplicated. On APFS the disk is cloned copy-on-write, so even a large image copies almost instantly."),
+                    ("Fresh identity", "SwiftVM writes a **new machine identifier** and generates **new MAC address(es)** for the clone automatically — the host and network never see two identical machines."),
+                    ("!",              "Everything **inside** the disk is an exact copy. The guest's machine-id, SSH host keys and hostname stay duplicated until you regenerate them below. Running two un-regenerated clones at once can cause DHCP lease clashes and SSH host-key warnings."),
+                    ("machine-id",     "Reset the guest's unique ID on systemd (Ubuntu/Debian), then reboot:"),
+                    ("",               "`sudo rm -f /etc/machine-id /var/lib/dbus/machine-id && sudo systemd-machine-id-setup`"),
+                    ("Void Linux",     "Void has no systemd — regenerate the id with dbus:"),
+                    ("",               "`sudo sh -c 'dbus-uuidgen > /etc/machine-id'`"),
+                    ("SSH host keys",  "Remove the copied keys so clients don't warn about a changed host identity:"),
+                    ("",               "`sudo rm -f /etc/ssh/ssh_host_*`"),
+                    ("Ubuntu",         "Regenerate: `sudo dpkg-reconfigure openssh-server`"),
+                    ("Void Linux",     "Regenerate: `sudo ssh-keygen -A`"),
+                    ("Hostname",       "Give the clone its own name on systemd:"),
+                    ("",               "`sudo hostnamectl set-hostname <new-name>`"),
+                    ("Void Linux",     "Set it directly in `/etc/hostname`:"),
+                    ("",               "`echo <new-name> | sudo tee /etc/hostname`"),
+                ]
+            ),
+            HelpTopic(
                 icon: "slider.horizontal.3", color: .purple,
                 title: "CPU & Memory",
                 rows: [

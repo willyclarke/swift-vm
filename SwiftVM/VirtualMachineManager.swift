@@ -117,6 +117,30 @@ final class VirtualMachineManager: NSObject, ObservableObject, VZVirtualMachineD
         }
     }
 
+    func cloneBundle() {
+        guard bundle.exists else { return }
+        let source = bundle
+        let panel = NSSavePanel()
+        panel.title = "Clone Virtual Machine"
+        panel.message = "Create a copy of \"\(source.displayName)\" with a fresh identity (new machine ID and MAC address)."
+        panel.nameFieldStringValue = "\(source.displayName) Clone.bundle"
+        panel.directoryURL = source.url.deletingLastPathComponent()
+        panel.canCreateDirectories = true
+        panel.begin { [weak self] response in
+            guard let self, response == .OK, var url = panel.url else { return }
+            if url.pathExtension.lowercased() != "bundle" {
+                url = url.appendingPathExtension("bundle")
+            }
+            do {
+                let dest = VMBundle(url: url)
+                try dest.clone(from: source)
+                self.bundle = dest
+            } catch {
+                self.showError(error)
+            }
+        }
+    }
+
     func addSharedFolder() {
         openFolderPicker(title: "Select Shared Folder") { [weak self] url in
             guard let self else { return }

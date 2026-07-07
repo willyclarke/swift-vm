@@ -166,4 +166,30 @@ struct VMBundle {
     func delete() throws {
         try FileManager.default.removeItem(at: url)
     }
+
+    /// Create this bundle as a clone of `source`.
+    ///
+    /// Copies the disk image, EFI variable store and config, but gives the clone
+    /// a fresh host identity: a brand-new machine identifier is written, and the
+    /// MAC address files are intentionally *not* copied so `VMConfigurationBuilder`
+    /// generates new random MACs on first boot. Guest-internal identity
+    /// (machine-id, SSH host keys, hostname) still lives inside `Disk.img` and
+    /// must be regenerated inside the guest — see the "Cloning a VM" Howto topic.
+    func clone(from source: VMBundle) throws {
+        let fm = FileManager.default
+        do {
+            try fm.createDirectory(at: url, withIntermediateDirectories: false)
+            // APFS clones Disk.img copy-on-write, so this is fast even for large images.
+            try fm.copyItem(at: source.diskImageURL, to: diskImageURL)
+            try fm.copyItem(at: source.nvramURL, to: nvramURL)
+            if fm.fileExists(atPath: source.configURL.path) {
+                try fm.copyItem(at: source.configURL, to: configURL)
+            }
+            let identifier = VZGenericMachineIdentifier()
+            try identifier.dataRepresentation.write(to: machineIdentifierURL)
+        } catch {
+            try? fm.removeItem(at: url)
+            throw error
+        }
+    }
 }
